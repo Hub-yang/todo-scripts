@@ -21,7 +21,7 @@
   ],
   "main": "index.js",
   "bin": {
-    "commitlint-init": "./commitlint-init/bin.js"
+    "commitlint-init": "./scripts/commitlint-init/index.js"
   },
   "scripts": {
     "lint": "eslint .",

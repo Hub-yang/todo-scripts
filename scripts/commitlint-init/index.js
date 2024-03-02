@@ -7,7 +7,7 @@ import { promisify } from 'node:util'
 import chalk from 'chalk'
 
 const e = promisify(exec)
-// eslint-disable-next-line no-console
+
 const log = console.log
 const RUN_INSTALL = 'pnpm install @commitlint/{cli,config-conventional} husky lint-staged -D'
 const RUN_HUSKY_INIT = 'npx husky init'
