@@ -1,0 +1,53 @@
+{
+  "name": "private-scripts",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Some public executable scripts",
+  "author": "Hubery Yang",
+  "license": "MIT",
+  "homepage": "https://github.com/Hub-yang/private-scripts#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hub-yang/private-scripts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hub-yang/private-scripts/issues"
+  },
+  "keywords": [
+    "scripts",
+    "bash",
+    "bin",
+    "sh"
+  ],
+  "main": "index.js",
+  "bin": {
+    "commit-lint-init": "./commit-lint-init/bin.mjs"
+  },
+  "scripts": {
+    "test": "test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "commitlint": "commitlint --edit",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@commitlint/cli": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.6.4",
+    "eslint": "^8.57.0",
+    "eslint-plugin-format": "^0.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint --edit $1"
+    }
+  },
+  "lint-staged": {
+    "*": "eslint . --fix"
+  }
+}
