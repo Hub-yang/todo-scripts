@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const process = require('node:process')
+// const process = require('node:process')
 const { exec } = require('node:child_process')
 const { readFile, writeFile } = require('node:fs/promises')
 const { promisify } = require('node:util')
@@ -44,45 +44,45 @@ const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm comm
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
 
 async function init() {
-  const a = process.argv[1]
-  if (/huberyyang-commitlintinitcjs/.test(a)) {
-    // install commitlint husky and lint-staged
-    const { stdout, stderr } = await e(RUN_INSTALL)
-    if (stderr)
-      // return chalk.red(stderr)
-      log(stdout)
+  // const a = process.argv[1]
+  // if (/huberyyang-commitlintinitcjs/.test(a)) {
+  // install commitlint husky and lint-staged
+  const { stdout, stderr } = await e(RUN_INSTALL)
+  if (stderr)
+  // return chalk.red(stderr)
+    log(stdout)
     // log(`${chalk.green('✔')} ${chalk.inverse.bold('install success!')}`)
 
-    // create commitlint.config.js and write in options
-    await w('commitlint.config.js', CONFIG_COMMITLINT)
-    // log(`${chalk.green('✔')} ${chalk.inverse.bold('config commitlint success!')}`)
+  // create commitlint.config.js and write in options
+  await w('commitlint.config.js', CONFIG_COMMITLINT)
+  // log(`${chalk.green('✔')} ${chalk.inverse.bold('config commitlint success!')}`)
 
-    // run ‘npx husky init’
-    await e(RUN_HUSKY_INIT)
-    // write in
-    await w('.husky/commit-msg', WRITE_COMMIT_MSG)
-    await w('.husky/pre-commit', WRITE_COMMIT_PRE)
-    // log(`${chalk.green('✔')} ${chalk.inverse.bold('config husky success!')}`)
+  // run ‘npx husky init’
+  await e(RUN_HUSKY_INIT)
+  // write in
+  await w('.husky/commit-msg', WRITE_COMMIT_MSG)
+  await w('.husky/pre-commit', WRITE_COMMIT_PRE)
+  // log(`${chalk.green('✔')} ${chalk.inverse.bold('config husky success!')}`)
 
-    // write in package.json
-    const n = 'package.json'
-    const f = await r(n)
-    const o = JSON.parse(f)
+  // write in package.json
+  const n = 'package.json'
+  const f = await r(n)
+  const o = JSON.parse(f)
     ;(o.scripts ||= {}).commitlint = 'commitlint --edit'
-    o.husky = {
-      hooks: {
-        'pre-commit': 'lint-staged',
-        'commit-msg': 'commitlint --edit $1',
-      },
-    }
-    o['lint-staged'] = {
-      '*': 'eslint . --fix',
-    }
-    await w(n, `${JSON.stringify(o, null, 2)}\n`)
-
-    // log(`${chalk.green('✔')} ${chalk.inverse.bold('config package.json success!\n')}`)
-    log('process down!')
+  o.husky = {
+    hooks: {
+      'pre-commit': 'lint-staged',
+      'commit-msg': 'commitlint --edit $1',
+    },
   }
+  o['lint-staged'] = {
+    '*': 'eslint . --fix',
+  }
+  await w(n, `${JSON.stringify(o, null, 2)}\n`)
+
+  // log(`${chalk.green('✔')} ${chalk.inverse.bold('config package.json success!\n')}`)
+  log('process down!')
 }
+// }
 
 init()
