@@ -8,6 +8,7 @@ import chalk from 'chalk'
 
 const e = promisify(exec)
 
+// eslint-disable-next-line no-console
 const log = console.log
 const RUN_INSTALL = 'pnpm install @commitlint/{cli,config-conventional} husky lint-staged -D'
 const RUN_HUSKY_INIT = 'npx husky init'
@@ -31,14 +32,15 @@ const CONFIG_COMMITLINT
       'chore',
     ]],
   },
-}`
+}
+`
 // eslint-disable-next-line no-template-curly-in-string
 const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
 
 async function init() {
   const a = process.argv[1]
-  if (/commitlint-init/.test(a)) {
+  if (/huberyyang/.test(a)) {
     // install commitlint husky and lint-staged
     const { stdout, stderr } = await e(RUN_INSTALL)
     if (stderr)
@@ -71,7 +73,7 @@ async function init() {
     o['lint-staged'] = {
       '*': 'eslint . --fix',
     }
-    await w(n, JSON.stringify(o, null, 2))
+    await w(n, `${JSON.stringify(o, null, 2)}\n`)
 
     log(`${chalk.green('✔')} ${chalk.inverse.bold('config package.json success!\n')}`)
     log('process down!')
