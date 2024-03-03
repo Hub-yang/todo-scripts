@@ -40,7 +40,7 @@ const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint
 
 async function init() {
   const a = process.argv[1]
-  if (/huberyyang/.test(a)) {
+  if (/huberyyang-commitlintinit/.test(a)) {
     // install commitlint husky and lint-staged
     const { stdout, stderr } = await e(RUN_INSTALL)
     if (stderr)

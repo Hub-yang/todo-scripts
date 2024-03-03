@@ -21,7 +21,8 @@
   ],
   "main": "index.js",
   "bin": {
-    "huberyyang": "./bin/commitlint-init.mjs"
+    "huberyyang-commitlintinit": "./bin/commitlint-init.mjs",
+    "huberyyang-test": "./bin/test.cjs"
   },
   "scripts": {
     "lint": "eslint .",
