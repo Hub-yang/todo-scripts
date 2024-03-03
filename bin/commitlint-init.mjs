@@ -6,11 +6,13 @@ import { promisify } from 'node:util'
 import { existsSync } from 'node:fs'
 
 const e = promisify(exec)
-async function checkPackage(moduleName) {
-  if (!existsSync(`./node_modules/${moduleName}`))
-    await e('pnpm install chalk --save')
-  const module = await import('chalk')
-  return module?.default || module[moduleName]
+async function checkPackage(moduleName, installMode = '') {
+  const m = moduleName
+  const t = installMode
+  if (!existsSync(`./node_modules/${m}`))
+    await e(`pnpm install ${m} ${t}`)
+  const module = await import(m)
+  return module?.default || module[m]
 }
 
 // eslint-disable-next-line no-console
