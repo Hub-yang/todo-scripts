@@ -6,6 +6,8 @@ import { promisify } from 'node:util'
 import { existsSync } from 'node:fs'
 
 const e = promisify(exec)
+// eslint-disable-next-line no-console
+const log = console.log
 async function checkPackage(moduleName, installMode = '') {
   const m = moduleName
   const t = installMode
@@ -15,8 +17,6 @@ async function checkPackage(moduleName, installMode = '') {
   return module?.default || module[m]
 }
 
-// eslint-disable-next-line no-console
-const log = console.log
 const RUN_INSTALL = 'pnpm install @commitlint/{cli,config-conventional} husky lint-staged --save-dev'
 const RUN_HUSKY_INIT = 'npx husky init'
 const CONFIG_COMMITLINT
@@ -46,27 +46,44 @@ const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm comm
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
 
 async function init() {
+  const startTime = new Date()
   // check installed chalk or not
   const chalk = await checkPackage('chalk')
+  const ora = await checkPackage('ora')
+
+  log(' ')
+  const spinner = ora({
+    text: chalk.bold('Process Start'),
+    isEnabled: false,
+  }).start()
+  log(' ')
+
+  spinner.isEnabled = true
+  spinner.start('install running...')
   // install commitlint husky and lint-staged
-  const { stdout, stderr } = await e(RUN_INSTALL)
+  const { stderr } = await e(RUN_INSTALL)
   if (stderr)
-    return chalk.red(stderr)
-  log(stdout)
-  log(`${chalk.green('✔')} ${chalk.inverse.bold('install success!')}`)
+    return spinner.fail(stderr)
+
+  spinner.succeed('install succeed!')
 
   // create commitlint.config.js and write in options
+  spinner.start('commitlint config running...')
   await w('commitlint.config.js', CONFIG_COMMITLINT)
-  log(`${chalk.green('✔')} ${chalk.inverse.bold('config commitlint success!')}`)
+
+  spinner.succeed('commitlint config succeed!')
 
   // run ‘npx husky init’
+  spinner.start('husky config running...')
   await e(RUN_HUSKY_INIT)
   // write in
   await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
-  log(`${chalk.green('✔')} ${chalk.inverse.bold('config husky success!')}`)
+
+  spinner.succeed('husky config succeed!')
 
   // write in package.json
+  spinner.start('package.json writting...')
   const n = 'package.json'
   const f = await r(n)
   const o = JSON.parse(f)
@@ -82,8 +99,16 @@ async function init() {
   }
   await w(n, `${JSON.stringify(o, null, 2)}\n`)
 
-  log(`${chalk.green('✔')} ${chalk.inverse.bold('config package.json success!\n')}`)
-  log('process down!')
+  spinner.succeed('package.json writting succeed!')
+  const endTime = new Date()
+  const elapsedTime = (endTime - startTime) / 1000
+
+  log(' ')
+  spinner.stopAndPersist({
+    text: chalk.bold(`Process Down in ${elapsedTime}s`),
+    symbol: '-',
+  })
+  log(' ')
 }
 
 init()
