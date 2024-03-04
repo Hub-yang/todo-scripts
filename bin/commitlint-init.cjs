@@ -47,10 +47,11 @@ const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint
 
 async function init() {
   const startTime = new Date()
+  log(' ')
+  log('packages checking...')
   // check installed chalk or not
   const chalk = await checkPackage('chalk')
   const ora = await checkPackage('ora')
-
   log(' ')
   const spinner = ora({
     text: chalk.bold('Process Start'),
