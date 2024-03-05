@@ -31,10 +31,6 @@
     "prepare": "husky",
     "commitlint": "commitlint --edit"
   },
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "ora": "^8.0.1"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
     "@commitlint/cli": "^19.0.3",
