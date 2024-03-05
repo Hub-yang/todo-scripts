@@ -1,7 +1,7 @@
 {
   "name": "private-scripts",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Some public executable scripts",
   "author": "Hubery Yang",
   "license": "MIT",
@@ -27,26 +27,11 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepare": "husky",
-    "commitlint": "commitlint --edit"
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
-    "@commitlint/cli": "^19.0.3",
-    "@commitlint/config-conventional": "^19.0.3",
     "eslint": "^8.57.0",
-    "eslint-plugin-format": "^0.1.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint --edit $1"
-    }
-  },
-  "lint-staged": {
-    "*": "eslint . --fix"
+    "eslint-plugin-format": "^0.1.0"
   }
 }
