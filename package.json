@@ -1,7 +1,7 @@
 {
-  "name": "private-scripts",
+  "name": "@huberyyang/todo-scripts",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.0-alpha.1",
   "description": "Some public executable scripts",
   "author": "Hubery Yang",
   "license": "MIT",
