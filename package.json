@@ -2,36 +2,57 @@
   "name": "@huberyyang/todo-scripts",
   "type": "module",
   "version": "1.0.0-alpha.1",
+  "packageManager": "pnpm@8.11.0",
   "description": "Some public executable scripts",
   "author": "Hubery Yang",
   "license": "MIT",
-  "homepage": "https://github.com/Hub-yang/private-scripts#readme",
+  "homepage": "https://github.com/Hub-yang/todo-scripts#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Hub-yang/private-scripts.git"
+    "url": "git+https://github.com/Hub-yang/todo-scripts.git"
   },
   "bugs": {
-    "url": "https://github.com/Hub-yang/private-scripts/issues"
+    "url": "https://github.com/Hub-yang/todo-scripts/issues"
   },
   "keywords": [
     "scripts",
+    "node",
     "bash",
     "bin",
     "sh"
   ],
-  "main": "index.js",
-  "bin": {
-    "huberyyang-commitlintinit": "./bin/commitlint-init.mjs",
-    "huberyyang-commitlintinit-cjs": "./bin/commitlint-init.cjs",
-    "huberyyang-test": "./bin/test.cjs"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "hubyang-commitlint-i": "bin/commitlint-init.mjs",
+    "hubyang-test": "bin/test.mjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
+    "build": "unbuild",
+    "release": "bumpp && npm publish",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "vitest"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
+    "@types/node": "^20.11.24",
+    "bumpp": "^9.4.0",
     "eslint": "^8.57.0",
-    "eslint-plugin-format": "^0.1.0"
+    "eslint-plugin-format": "^0.1.0",
+    "typescript": "^5.3.3",
+    "unbuild": "^2.0.0"
   }
 }
