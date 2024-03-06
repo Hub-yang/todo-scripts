@@ -1,7 +1,7 @@
 {
   "name": "@huberyyang/todo-scripts",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "packageManager": "pnpm@8.11.0",
   "description": "Some public executable scripts",
   "author": "Hubery Yang",
@@ -43,8 +43,7 @@
     "build": "unbuild",
     "release": "bumpp && npm publish",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test": "vitest"
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
@@ -52,6 +51,7 @@
     "bumpp": "^9.4.0",
     "eslint": "^8.57.0",
     "eslint-plugin-format": "^0.1.0",
+    "execa": "^8.0.1",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0"
   }
