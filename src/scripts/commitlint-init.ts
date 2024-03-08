@@ -1,16 +1,14 @@
 #!/usr/bin/env node
-
-// import { exec } from 'node:child_process'
-import { readFile as r, writeFile as w } from 'node:fs/promises'
+import { writeFile as w } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import process from 'node:process'
-import path from 'node:path'
-import { execaCommand } from 'execa'
+import { type ModuleDesc, checkPackage } from '../utils/check'
+import { Print } from '../utils/print'
+import { uninstallPackages } from '../utils/uninstall'
+import { getPackageJSON, writePackageJSON } from '../utils/fs'
+import { execCommand } from '../utils/exec'
 
-// const e = promisify(exec)
-
-const RUN_INSTALL = 'pnpm install @commitlint/cli @commitlint/config-conventional husky lint-staged --save-dev'
-const RUN_HUSKY_INIT = 'npx husky init'
 const CONFIG_COMMITLINT
 = `export default {
   extends: ['@commitlint/config-conventional'],
@@ -35,106 +33,42 @@ const CONFIG_COMMITLINT
 // eslint-disable-next-line no-template-curly-in-string
 const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
-
-async function checkPackage(packageName: string, installMode = '') {
-  const fullPath = path.join(process.cwd(), 'node_modules')[0]
-
-  // if (!fullPath) {
-  //   // eslint-disable-next-line no-console
-  //   console.log('please run `npm install` first')
-  //   process.exit()
-  // }
-
-  let shouldUninstall = true
-  const p = packageName
-  const t = installMode
-  const isExist = existsSync(`${fullPath}/${p}`)
-  if (!isExist)
-    await execaCommand(`pnpm install ${p} ${t}`)
-  else
-    shouldUninstall = false
-  const module = await import(p)
-  return {
-    module: module?.default || module[p],
-    shouldUninstall,
-  }
-}
-
-async function handleUninstall(packageName: string) {
-  await execaCommand(`pnpm uninstall ${packageName}`)
-}
-
-class Print {
-  interval: NodeJS.Timeout | null = null
-  startWithDots(prefixText = '') {
-    const l = prefixText.length || 0
-    const startWith = prefixText
-    this.interval = setInterval(() => {
-      process.stdout.clearLine(0) // 清除当前行
-      process.stdout.cursorTo(0) // 将光标移动到行首
-      process.stdout.write(`${prefixText}`)
-      prefixText += '.'
-      if (prefixText.length > l + 3)
-        prefixText = startWith
-    }, 400)
-  }
-
-  log(text: string) {
-    // eslint-disable-next-line no-console
-    console.log(text)
-  }
-
-  clear() {
-    clearInterval(this.interval as NodeJS.Timeout)
-    process.stdout.clearLine(0)
-    process.stdout.cursorTo(0)
-  }
-}
+const packagesUninstallQueue = new Map()
+const log = console.log
 
 async function main() {
   const startTime = +new Date()
-
   const print = new Print()
-  print.startWithDots('packages checking')
-  const { module: ora, shouldUninstall: oraShouldBeUninstall } = await checkPackage('ora')
-  const { module: chalk, shouldUninstall: chalkShouldBeUninstall } = await checkPackage('chalk')
+
+  print.startWithDots({ prefixText: 'packages checking' })
+  const { module: ora } = await checkPackage({ packageName: 'ora', needImport: true }) as ModuleDesc
+  packagesUninstallQueue.set('ora', true)
+  const { module: chalk } = await checkPackage({ packageName: 'chalk', needImport: true }) as ModuleDesc
+  packagesUninstallQueue.set('chalk', true)
   print.clear()
-  print.log(' ')
+
+  log(' ')
   const spinner = ora({
     text: chalk.bold('Process Start'),
     isEnabled: false,
   }).start()
-  print.log(' ')
+  log(' ')
   spinner.isEnabled = true
 
   // check git
-
-  const fullPath = path.join(process.cwd(), '.git')
-  if (!existsSync(fullPath)) {
+  const cwd = process.cwd()
+  const path = resolve(cwd, '.git')
+  if (!existsSync(path)) {
     spinner.start('git init checking...')
-    try {
-      execaCommand('git init')
-    }
-    catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err)
-    }
+    await execCommand('git init')
     spinner.succeed('git init down!')
   }
 
-  spinner.start('commitlint config running...')
-  await w('commitlint.config.js', CONFIG_COMMITLINT)
-  spinner.succeed('commitlint config succeed!')
-
-  spinner.start('install running...')
   // start install
-  try {
-    await execaCommand(RUN_INSTALL)
-  }
-  catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err)
-  }
+  print.startWithDots({ prefixText: 'install running', withOra: true, spinner })
+  for await (const pkg of ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged'])
+    await checkPackage({ packageName: pkg, saveMode: '--save-dev' })
+  print.clear(true)
   spinner.succeed('install succeed!')
 
   // create commitlint.config.js and write in options
@@ -144,22 +78,15 @@ async function main() {
 
   // config husky
   spinner.start('husky config running...')
-  try {
-    await execaCommand(RUN_HUSKY_INIT)
-  }
-  catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err)
-  }
+  await execCommand('npx husky init')
   await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
   spinner.succeed('husky config succeed!')
 
   // write in package.json
   spinner.start('package.json writting...')
-  const n = 'package.json'
-  const f = await r(n)
-  const o = JSON.parse(f as any);
+
+  const o = getPackageJSON() as any
   (o.scripts ||= {}).commitlint = 'commitlint --edit'
   o.husky = {
     hooks: {
@@ -170,40 +97,40 @@ async function main() {
   o['lint-staged'] = {
     '*': 'eslint . --fix',
   }
-  await w(n, `${JSON.stringify(o, null, 2)}\n`)
+  await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')
 
-  if (oraShouldBeUninstall || chalkShouldBeUninstall) {
-    spinner.start('process dependencies uninstalling...')
-    chalkShouldBeUninstall && await handleUninstall('chalk')
-    oraShouldBeUninstall && await handleUninstall('ora')
+  if (packagesUninstallQueue.size > 0) {
+    print.startWithDots({ prefixText: 'process dependencies uninstalling', withOra: true, spinner })
+    for await (const pkg of packagesUninstallQueue)
+      await uninstallPackages(pkg[0])
+    print.clear(true)
     spinner.succeed('uninstall succeed!')
   }
 
   // 检查执行eslint
-  if (existsSync('./node_modules/eslint')) {
-    spinner.start('lint running...')
-    const n = 'package.json'
-    const f = await r(n)
-    let o = JSON.parse(f as any);
+  if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
+    print.startWithDots({ prefixText: 'lint running', withOra: true, spinner })
+    let o = getPackageJSON() as any
     (o.scripts ||= {})['hubery:fix'] = `eslint . --fix || true`
-    await w(n, `${JSON.stringify(o, null, 2)}\n`)
-    await execaCommand('pnpm run hubery:fix')
-    o = JSON.parse(await r(n) as any)
+    await writePackageJSON(o)
+    await execCommand('pnpm run hubery:fix')
+    o = getPackageJSON()
     delete o.scripts['hubery:fix']
-    await w(n, `${JSON.stringify(o, null, 2)}\n`)
+    await writePackageJSON(o)
+    print.clear(true)
     spinner.succeed('lint down!')
   }
 
   const endTime = +new Date()
   const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
 
-  print.log(' ')
+  log(' ')
   spinner.stopAndPersist({
     text: chalk.green.bold('Process Down') + chalk.bold(` in ${elapsedTime}s`),
     symbol: '-',
   })
-  print.log(' ')
+  log(' ')
 }
 
 main()
