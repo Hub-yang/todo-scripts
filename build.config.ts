@@ -12,11 +12,6 @@ export default defineBuildConfig({
       name: 'commitlint-init',
       outDir: './dist',
     },
-    {
-      input: './src/scripts/test',
-      name: 'test',
-      outDir: './dist',
-    },
   ],
   // Generates .d.ts declaration file
   declaration: true,
