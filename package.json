@@ -32,8 +32,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "hubyang-commitlint-i": "bin/commitlint-init.mjs",
-    "hubyang-test": "bin/test.mjs"
+    "hubyang-commitlint-i": "bin/commitlint-init.mjs"
   },
   "files": [
     "bin",
@@ -43,16 +42,31 @@
     "build": "unbuild",
     "release": "bumpp && npm publish",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
+    "@commitlint/cli": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
     "@types/node": "^20.11.24",
     "bumpp": "^9.4.0",
     "eslint": "^8.57.0",
     "eslint-plugin-format": "^0.1.0",
     "execa": "^8.0.1",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint --edit $1"
+    }
+  },
+  "lint-staged": {
+    "*": "eslint . --fix"
   }
 }
