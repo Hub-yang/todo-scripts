@@ -8,6 +8,18 @@ interface PrintOptions {
 
 export class Print {
   interval: NodeJS.Timeout | null = null
+  private static instance: Print | null = null
+
+  private constructor() {
+    // 私有构造函数，确保不能在外部创建实例
+  }
+
+  static getInstance() {
+    if (!Print.instance)
+      Print.instance = new Print()
+    return Print.instance
+  }
+
   startWithDots({ prefixText = '', withOra, spinner }: PrintOptions) {
     const l = prefixText.length || 0
     const startWith = prefixText

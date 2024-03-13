@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import fs from 'node:fs'
 import process from 'node:process'
 import { writeFile as w } from 'node:fs/promises'
-import type { AnyKey } from '../global'
+import type { AnyKey } from '../../global'
 
 export function getPackageJSON(): any {
   const cwd = process.cwd()

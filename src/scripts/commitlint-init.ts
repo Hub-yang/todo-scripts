@@ -3,9 +3,10 @@ import { writeFile as w } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
-import { type ModuleDesc, checkPackage } from '../utils/check'
+import ora from 'ora'
+import chalk from 'chalk'
+import { checkPackage } from '../utils/check'
 import { Print } from '../utils/print'
-import { uninstallPackages } from '../utils/uninstall'
 import { getPackageJSON, writePackageJSON } from '../utils/fs'
 import { execCommand } from '../utils/exec'
 
@@ -33,19 +34,11 @@ const CONFIG_COMMITLINT
 // eslint-disable-next-line no-template-curly-in-string
 const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
-const packagesUninstallQueue = new Map()
 const log = console.log
 
 async function main() {
   const startTime = +new Date()
-  const print = new Print()
-
-  print.startWithDots({ prefixText: 'packages checking' })
-  const { module: ora } = await checkPackage({ packageName: 'ora', needImport: true }) as ModuleDesc
-  packagesUninstallQueue.set('ora', true)
-  const { module: chalk } = await checkPackage({ packageName: 'chalk', needImport: true }) as ModuleDesc
-  packagesUninstallQueue.set('chalk', true)
-  print.clear()
+  const print = Print.getInstance()
 
   log(' ')
   const spinner = ora({
@@ -53,7 +46,7 @@ async function main() {
     isEnabled: false,
   }).start()
   log(' ')
-  spinner.isEnabled = true
+  ;(spinner as any).isEnabled = true
 
   // check git
   const cwd = process.cwd()
@@ -99,14 +92,6 @@ async function main() {
   }
   await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')
-
-  if (packagesUninstallQueue.size > 0) {
-    print.startWithDots({ prefixText: 'process dependencies uninstalling', withOra: true, spinner })
-    for await (const pkg of packagesUninstallQueue)
-      await uninstallPackages(pkg[0])
-    print.clear(true)
-    spinner.succeed('uninstall succeed!')
-  }
 
   // 检查执行eslint
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {

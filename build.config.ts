@@ -8,6 +8,11 @@ export default defineBuildConfig({
       outDir: './dist',
     },
     {
+      input: './src/scripts/main',
+      name: 'main',
+      outDir: './dist',
+    },
+    {
       input: './src/scripts/commitlint-init',
       name: 'commitlint-init',
       outDir: './dist',
