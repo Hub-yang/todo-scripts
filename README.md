@@ -1,4 +1,4 @@
-<h3 align=center>一些帮助简化前端配置工程的通用脚本</h3>
+<h3 align=center>🔥一些帮助简化前端配置工程的通用脚本</h3>
 
 ## 现在开始
 
@@ -22,7 +22,7 @@ bun add --dev @huberyyang/todo-scripts
 
 ## > `commitlint config`
 
-自动执行 [commitlint](https://github.com/conventional-changelog/commitlint) + [husky](https://github.com/typicode/husky) + [lint-staged](https://github.com/lint-staged/lint-staged)安装与配置
+🚀自动执行 [commitlint](https://github.com/conventional-changelog/commitlint) + [husky](https://github.com/typicode/husky) + [lint-staged](https://github.com/lint-staged/lint-staged)安装与配置
 
 ```shell [npm]
 npx hubery commitlint-init
@@ -34,6 +34,15 @@ pnpm exec hubery commitlint-init
 
 ```shell [bun]
 bunx hubery commitlint-init
+```
+
+## 命令参数
+
+🧹`清洁执行`-如果希望执行完脚本后卸载模块，只需为命令行添加参数`--clear`
+
+```shell [npm]
+# 如
+npx hubery commitlint-init --clear
 ```
 
 ## 尝试执行
