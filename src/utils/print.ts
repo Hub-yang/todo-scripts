@@ -40,6 +40,10 @@ export class Print {
     }, 400)
   }
 
+  log(text: any) {
+    console.log(text)
+  }
+
   clear(withOra?: boolean) {
     if (!withOra) {
       process.stdout.clearLine(0)

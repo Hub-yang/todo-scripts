@@ -4,7 +4,6 @@ import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import ora from 'ora'
-import chalk from 'chalk'
 import { checkPackage } from '../utils/check'
 import { Print } from '../utils/print'
 import { getPackageJSON, writePackageJSON } from '../utils/fs'
@@ -34,19 +33,10 @@ const CONFIG_COMMITLINT
 // eslint-disable-next-line no-template-curly-in-string
 const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
 const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
-const log = console.log
 
-async function main() {
-  const startTime = +new Date()
+export async function main() {
   const print = Print.getInstance()
-
-  log(' ')
-  const spinner = ora({
-    text: chalk.bold('Process Start'),
-    isEnabled: false,
-  }).start()
-  log(' ')
-  ;(spinner as any).isEnabled = true
+  const spinner = ora()
 
   // check git
   const cwd = process.cwd()
@@ -78,7 +68,6 @@ async function main() {
 
   // write in package.json
   spinner.start('package.json writting...')
-
   const o = getPackageJSON() as any
   (o.scripts ||= {}).commitlint = 'commitlint --edit'
   o.husky = {
@@ -93,11 +82,11 @@ async function main() {
   await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')
 
-  // 检查执行eslint
+  // lint if exit
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
     print.startWithDots({ prefixText: 'lint running', withOra: true, spinner })
     let o = getPackageJSON() as any
-    (o.scripts ||= {})['hubery:fix'] = `eslint . --fix || true`
+    (o.scripts ||= {})['hubery:fix'] = `eslint package.json commitlint.config.js --fix || true`
     await writePackageJSON(o)
     await execCommand('pnpm run hubery:fix')
     o = getPackageJSON()
@@ -106,16 +95,4 @@ async function main() {
     print.clear(true)
     spinner.succeed('lint down!')
   }
-
-  const endTime = +new Date()
-  const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
-
-  log(' ')
-  spinner.stopAndPersist({
-    text: chalk.green.bold('Process Down') + chalk.bold(` in ${elapsedTime}s`),
-    symbol: '-',
-  })
-  log(' ')
 }
-
-main()
