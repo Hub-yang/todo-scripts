@@ -1,12 +1,11 @@
 // match scripts
 import process from 'node:process'
-import fg from 'fast-glob'
 import ora from 'ora'
 import chalk from 'chalk'
 import { Print } from '../utils/print'
 import { uninstallPackages } from '../utils/uninstall'
 
-const scriptsMap = fg.sync('src/scripts/*.ts').map((i: any) => i.split('/').at(-1).slice(0, -3))
+const scriptsMap = ['commitlint-init']
 ;(async () => {
   const a = process.argv[2]
   const option = process.argv[3]
