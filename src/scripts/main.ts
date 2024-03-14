@@ -4,13 +4,11 @@ import terminalLink from 'terminal-link'
 import { uninstallPackages } from '../utils/uninstall'
 import { computeTimeConsuming } from '../utils/timeConsuming'
 import { Print } from '../utils/print'
-import { getPackageJSON } from '../utils/fs'
 
-let { name, version, author, homepage } = getPackageJSON()
-name = chalk.bold.italic(name)
-version = chalk.blue(`version ${version}`)
-author = chalk.blue(`author ${author}`)
-homepage = chalk.dim(`(${homepage})`)
+const version = chalk.blue('version 1.0.0-beta.5')
+const name = chalk.bold.italic('@huberyyang/todo-scripts')
+const author = chalk.blue('author HuberyYang')
+const homepage = chalk.dim('(https://github.com/Hub-yang/todo-scripts)')
 
 const link_version = terminalLink(version, 'https://www.npmjs.com/package/@huberyyang/todo-scripts')
 const link_name = terminalLink(name, 'https://github.com/Hub-yang/todo-scripts')
