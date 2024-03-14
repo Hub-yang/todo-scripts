@@ -2,6 +2,12 @@
 
 ## 现在开始
 
+⚠️ 目前模块内使用pnpm，后期新增自动判断
+```shell [npm]
+# 没有pnpm？，请执行
+npm install pnpm -g
+```
+
 ### 安装
 
 ```shell [npm]
