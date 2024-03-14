@@ -56,7 +56,7 @@ npx hubery commitlint-init --clear
 如果没什么意外（顺利执行且终端没有报错）恭喜你配置完成🎉. 来测试下:
 
 ```shell
+git add .
 git commit -m "test commitlint"
-# eslint 会在每次执行commit前自动执行
-
+# eslint 会在每次执行commit前自动执行，如需更改commit钩子执行前的命令，可自行修改package.json中lint-staged配置
 ```
