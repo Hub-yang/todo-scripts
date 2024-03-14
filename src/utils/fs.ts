@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import process from 'node:process'
 import { writeFile as w } from 'node:fs/promises'
 import type { AnyKey } from '../../global'
+import { Print } from './print'
 
 export function getPackageJSON(): any {
   const cwd = process.cwd()
@@ -15,7 +16,7 @@ export function getPackageJSON(): any {
       return data
     }
     catch (e) {
-      console.warn('\nFailed to parse package.json')
+      Print.getInstance().err('Failed to parse package.json.')
       process.exit(1)
     }
   }
@@ -26,7 +27,7 @@ export async function writePackageJSON(data: AnyKey) {
     await w('package.json', `${JSON.stringify(data, null, 2)}\n`)
   }
   catch (error) {
-    console.warn('\nFailed to write in package.json')
+    Print.getInstance().err('Failed to write in package.json.')
     process.exit(1)
   }
 }

@@ -1,5 +1,6 @@
 import process from 'node:process'
 import type { ModuleDesc } from './check'
+import { Print } from './print'
 
 export async function importPackage(packageName: string): Promise<ModuleDesc> {
   try {
@@ -9,7 +10,7 @@ export async function importPackage(packageName: string): Promise<ModuleDesc> {
     }
   }
   catch (e) {
-    console.warn(`\nFailed to import ${packageName}`)
+    Print.getInstance().err(`Failed to import ${packageName}.`)
     process.exit(1)
   }
 }

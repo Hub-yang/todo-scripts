@@ -1,44 +1,58 @@
-// match scripts
 import process from 'node:process'
-import ora from 'ora'
 import chalk from 'chalk'
-import { Print } from '../utils/print'
+import terminalLink from 'terminal-link'
 import { uninstallPackages } from '../utils/uninstall'
+import { computeTimeConsuming } from '../utils/timeConsuming'
+import { Print } from '../utils/print'
+import { getPackageJSON } from '../utils/fs'
+
+let { name, version, author, homepage } = getPackageJSON()
+name = chalk.bold.italic(name)
+version = chalk.blue(`version ${version}`)
+author = chalk.blue(`author ${author}`)
+homepage = chalk.dim(`(${homepage})`)
+
+const link_version = terminalLink(version, 'https://www.npmjs.com/package/@huberyyang/todo-scripts')
+const link_name = terminalLink(name, 'https://github.com/Hub-yang/todo-scripts')
+const link_author = terminalLink(author, 'https://github.com/Hub-yang/todo-scripts')
+const isSupported = terminalLink.isSupported
+
+if (isSupported) {
+  console.log(`
+   ==================================
+   ⦚       ${link_name} ⦚
+   ⦚                                ⦚
+   ⦚           ${link_version} ⦚
+   ⦚              ${link_author} ⦚
+   ==================================`)
+}
+else {
+  console.log(`
+   ==============================================
+   ⦚         ${name}           ⦚
+   ⦚                                            ⦚
+   ⦚                       ${version} ⦚
+   ⦚                          ${author} ⦚
+   ⦚ ${homepage} ⦚
+   ==============================================`)
+}
 
 const scriptsMap = ['commitlint-init']
+
 ;(async () => {
   const a = process.argv[2]
-  const option = process.argv[3]
-  const startTime = +new Date()
+  const o = process.argv[3]
   const print = Print.getInstance()
+
   if (a && scriptsMap.includes(a)) {
-    print.log(' ')
-    const spinner = ora({
-      text: chalk.bold('Process Start'),
-      isEnabled: false,
-    }).start()
-    print.log(' ')
-    ;(spinner as any).isEnabled = true
-
     const script = await import(`./${a}.mjs`)
-    await script.main()
-
-    const endTime = +new Date()
-    const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
-    print.log(' ')
-    spinner.stopAndPersist({
-      text: chalk.green.bold('Process Down') + chalk.bold(` in ${elapsedTime}s`),
-      symbol: '-',
-    })
-    print.log(' ')
-
+    await computeTimeConsuming(script.main)
     // Check if uninstallation is required
-    if (option === '--clear')
+    if (o === '--clear')
       await uninstallPackages('@huberyyang/todo-scripts')
   }
   else {
-    console.warn('\nPlease use a script')
+    print.warn('Please use a script.')
     process.exit(1)
   }
-  // 通过--clear判断是否需要卸载
 })()

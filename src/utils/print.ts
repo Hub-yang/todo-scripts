@@ -1,4 +1,5 @@
 import process from 'node:process'
+import chalk from 'chalk'
 
 interface PrintOptions {
   prefixText: string
@@ -40,8 +41,20 @@ export class Print {
     }, 400)
   }
 
-  log(text: any) {
-    console.log(text)
+  log(logMsg: any) {
+    console.log(logMsg)
+  }
+
+  warn(warnMsg: any) {
+    console.log(' ')
+    console.log(`${chalk.bgYellow(' WARN ')} ${warnMsg}`)
+    console.log(' ')
+  }
+
+  err(errMsg: any) {
+    console.log(' ')
+    console.log(`${chalk.bgRed(' ERROR ')} ${errMsg}`)
+    console.log(' ')
   }
 
   clear(withOra?: boolean) {

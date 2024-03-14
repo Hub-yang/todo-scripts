@@ -12,7 +12,7 @@ export async function uninstallPackages(pkg: string) {
     spinner.succeed(`succeed to uninstall ${pkg}!`)
   }
   catch (error) {
-    console.warn(`\nFail to uninstall ${pkg}`)
+    Print.getInstance().err(`Failed to uninstall ${pkg}.`)
     process.exit(1)
   }
 }
