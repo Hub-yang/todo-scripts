@@ -4,11 +4,14 @@ import terminalLink from 'terminal-link'
 import { uninstallPackages } from '../utils/uninstall'
 import { computeTimeConsuming } from '../utils/timeConsuming'
 import { Print } from '../utils/print'
+import { getPkgInfo } from '../utils/info'
 
-const version = chalk.blue('version 1.0.0-beta.5')
-const name = chalk.bold.italic('@huberyyang/todo-scripts')
-const author = chalk.blue('author HuberyYang')
-const homepage = chalk.dim('(https://github.com/Hub-yang/todo-scripts)')
+// get pkg info
+let { version = '--', author = 'HuberyYang', name = '@huberyyang/todo-scripts', homepage = 'https://github.com/Hub-yang/todo-scripts' } = getPkgInfo()
+version = chalk.blue(`version ${version}`)
+name = chalk.bold.italic(name)
+author = chalk.blue(`author ${author}`)
+homepage = chalk.dim(`(${homepage})`)
 
 const link_version = terminalLink(version, 'https://www.npmjs.com/package/@huberyyang/todo-scripts')
 const link_name = terminalLink(name, 'https://github.com/Hub-yang/todo-scripts')
@@ -20,7 +23,7 @@ if (isSupported) {
    ==================================
    ⦚       ${link_name} ⦚
    ⦚                                ⦚
-   ⦚           ${link_version} ⦚
+   ⦚                  ${link_version} ⦚
    ⦚              ${link_author} ⦚
    ==================================`)
 }
