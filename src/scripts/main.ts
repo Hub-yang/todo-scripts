@@ -46,8 +46,10 @@ const scriptsMap = ['commitlint-init']
     const script = await import(`./${a}.mjs`)
     await computeTimeConsuming(script.main)
     // Check if uninstallation is required
-    if (o === '--clear')
+    if (o === '--clear') {
       await uninstallPackages('@huberyyang/todo-scripts')
+      process.exit()
+    }
   }
   else {
     print.warn('Please use a script.')
