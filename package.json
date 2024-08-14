@@ -57,6 +57,8 @@
     "@commitlint/config-conventional": "^19.1.0",
     "@types/node": "^20.11.24",
     "bumpp": "^9.4.0",
+    "commitizen": "^4.3.0",
+    "cz-git": "^1.9.4",
     "eslint": "^8.57.0",
     "eslint-plugin-format": "^0.1.0",
     "execa": "^8.0.1",
@@ -74,5 +76,10 @@
   },
   "lint-staged": {
     "*": "eslint . --fix"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
   }
 }

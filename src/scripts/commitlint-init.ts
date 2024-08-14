@@ -8,33 +8,11 @@ import { checkPackage } from '../utils/check'
 import { Print } from '../utils/print'
 import { getPackageJSON, writePackageJSON } from '../utils/fs'
 import { execCommand } from '../utils/exec'
+import type { AnyKey } from '../../global'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '../constants'
 
-const CONFIG_COMMITLINT
-= `export default {
-  extends: ['@commitlint/config-conventional'],
-  rules: {
-    'type-enum': [2, 'always', [
-      'build',
-      'ci',
-      'docs',
-      'feat',
-      'merge',
-      'fix',
-      'perf',
-      'refactor',
-      'style',
-      'test',
-      'revert',
-      'update',
-      'chore',
-    ]],
-  },
-}`
-// eslint-disable-next-line no-template-curly-in-string
-const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
-const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
-
-export async function main() {
+export async function main(options: AnyKey) {
+  const useCZGit = options.includes('--czgit')
   const print = Print.getInstance()
   const spinner = ora()
 
@@ -49,14 +27,17 @@ export async function main() {
 
   // start install
   print.startWithDots({ prefixText: 'install running', withOra: true, spinner })
-  for await (const pkg of ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged'])
+  const pkgs: string[] = ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged']
+  if (useCZGit)
+    pkgs.push('commitizen', 'cz-git')
+  for await (const pkg of pkgs)
     await checkPackage({ packageName: pkg, saveMode: '--save-dev' })
   print.clear(true)
   spinner.succeed('install succeed!')
 
   // create commitlint.config.js and write in options
   spinner.start('commitlint config running...')
-  await w('commitlint.config.js', CONFIG_COMMITLINT)
+  await w('commitlint.config.js', useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT)
   spinner.succeed('commitlint config succeed!')
 
   // config husky
@@ -78,6 +59,13 @@ export async function main() {
   }
   o['lint-staged'] = {
     '*': 'eslint . --fix',
+  }
+  if (useCZGit) {
+    o.config = {
+      commitizen: {
+        path: 'node_modules/cz-git',
+      },
+    }
   }
   await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')

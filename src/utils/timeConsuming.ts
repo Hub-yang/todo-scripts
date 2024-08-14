@@ -1,10 +1,11 @@
 import ora from 'ora'
 import chalk from 'chalk'
+import type { AnyKey } from '../../global'
 import { Print } from './print'
 
-type MainCallBack = () => Promise<void>
+type MainCallBack = (options?: AnyKey) => Promise<void>
 
-export async function computeTimeConsuming(cb: MainCallBack) {
+export async function computeTimeConsuming(cb: MainCallBack, options: AnyKey) {
   const startTime = +new Date()
   const print = Print.getInstance()
   print.log(' ')
@@ -15,7 +16,7 @@ export async function computeTimeConsuming(cb: MainCallBack) {
   print.log(' ')
   ;(spinner as any).isEnabled = true
 
-  await cb()
+  await cb(options)
 
   const endTime = +new Date()
   const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)

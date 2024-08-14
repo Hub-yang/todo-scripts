@@ -1,4 +1,27 @@
-/** @type {import('cz-git').UserConfig} */
+export const CONFIG_COMMITLINT
+= `export default {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [2, 'always', [
+      'build',
+      'ci',
+      'docs',
+      'feat',
+      'merge',
+      'fix',
+      'perf',
+      'refactor',
+      'style',
+      'test',
+      'revert',
+      'update',
+      'chore',
+    ]],
+  },
+}`
+
+export const CONFIG_COMMITLINT_CZGIT
+= `/** @type {import('cz-git').UserConfig} */
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
@@ -22,12 +45,12 @@ export default {
       type: '选择你要提交的类型 :',
       scope: '选择一个提交范围（可选）:',
       customScope: '请输入自定义的提交范围 :',
-      subject: '填写简短精炼的变更描述 :\n',
-      body: '填写更加详细的变更描述（可选）。使用 "|" 换行 :\n',
-      breaking: '列举非兼容性重大的变更（可选）。使用 "|" 换行 :\n',
+      subject: '填写简短精炼的变更描述 :\\n',
+      body: '填写更加详细的变更描述（可选）。使用 "|" 换行 :\\n',
+      breaking: '列举非兼容性重大的变更（可选）。使用 "|" 换行 :\\n',
       footerPrefixesSelect: '选择关联issue前缀（可选）:',
       customFooterPrefix: '输入自定义issue前缀 :',
-      footer: '列举关联issue (可选) 例如: #31, #I3244 :\n',
+      footer: '列举关联issue (可选) 例如: #31, #I3244 :\\n',
       confirmCommit: '是否提交或修改commit ?',
     },
     types: [
@@ -78,3 +101,7 @@ export default {
     defaultSubject: '',
   },
 }
+`
+// eslint-disable-next-line no-template-curly-in-string
+export const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
+export const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
