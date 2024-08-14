@@ -45,7 +45,7 @@ bunx hubery commitlint-init
 ## 配置项
 
 `--clear`
-🧹清洁执行 - 执行完脚本后卸载模块，只需为命令行添加参数
+🧹清洁执行 - 执行完脚本后卸载模块
 
 ```shell [npm]
 # 执行
