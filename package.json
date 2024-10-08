@@ -1,7 +1,7 @@
 {
   "name": "@huberyyang/todo-scripts",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4-beta.1",
   "packageManager": "pnpm@9.0.6",
   "description": "Some public executable scripts",
   "author": "HuberyYang",
