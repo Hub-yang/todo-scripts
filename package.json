@@ -32,7 +32,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "hubery": "bin/bin.mjs"
+    "hubery": "bin/bin.mjs",
+    "console": "bin/console.js"
   },
   "files": [
     "bin",
