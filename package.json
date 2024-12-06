@@ -1,7 +1,7 @@
 {
   "name": "@huberyyang/todo-scripts",
   "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.4-alpha.1",
   "packageManager": "pnpm@9.0.6",
   "description": "Some public executable scripts",
   "author": "HuberyYang",
@@ -45,7 +45,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "cz": "git cz"
   },
   "dependencies": {
     "chalk": "^5.3.0",

@@ -66,6 +66,7 @@ export async function main(options: AnyKey) {
         path: 'node_modules/cz-git',
       },
     }
+    o.scripts.cz = 'git cz'
   }
   await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')
