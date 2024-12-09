@@ -9,7 +9,7 @@ export async function importPackage(packageName: string): Promise<ModuleDesc> {
       module: module?.default || module?.[packageName],
     }
   }
-  catch (e) {
+  catch (_e) {
     Print.getInstance().err(`Failed to import ${packageName}.`)
     process.exit(1)
   }

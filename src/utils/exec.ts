@@ -6,7 +6,7 @@ export async function execCommand(command: string) {
   try {
     await execaCommand(command)
   }
-  catch (error) {
+  catch (_error) {
     Print.getInstance().err(`Failed to execute '${command}'.`)
     process.exit(1)
   }

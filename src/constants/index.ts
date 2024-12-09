@@ -102,6 +102,5 @@ export default {
   },
 }
 `
-// eslint-disable-next-line no-template-curly-in-string
-export const WRITE_COMMIT_MSG = '#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm commitlint ${1}'
-export const WRITE_COMMIT_PRE = `#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\n\npnpm lint-staged`
+
+export const WRITE_COMMIT_PRE = `pnpm lint-staged`

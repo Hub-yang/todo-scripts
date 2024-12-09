@@ -73,5 +73,3 @@ git commit -m "test commitlint"
 ```
 
 ## License
-
-[MIT](./LICENSE) License &copy; 2024 [Hubery Yang](https://github.com/Hub-yang)

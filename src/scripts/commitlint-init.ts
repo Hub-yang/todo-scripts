@@ -9,7 +9,7 @@ import { Print } from '../utils/print'
 import { getPackageJSON, writePackageJSON } from '../utils/fs'
 import { execCommand } from '../utils/exec'
 import type { AnyKey } from '../../global'
-import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '../constants'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_PRE } from '../constants'
 
 export async function main(options: AnyKey) {
   const useCZGit = options.includes('--czgit')
@@ -43,7 +43,6 @@ export async function main(options: AnyKey) {
   // config husky
   spinner.start('husky config running...')
   await execCommand('npx husky init')
-  await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
   spinner.succeed('husky config succeed!')
 
@@ -51,12 +50,6 @@ export async function main(options: AnyKey) {
   spinner.start('package.json writting...')
   const o = getPackageJSON() as any
   (o.scripts ||= {}).commitlint = 'commitlint --edit'
-  o.husky = {
-    hooks: {
-      'pre-commit': 'lint-staged',
-      'commit-msg': 'commitlint --edit $1',
-    },
-  }
   o['lint-staged'] = {
     '*': 'eslint . --fix',
   }

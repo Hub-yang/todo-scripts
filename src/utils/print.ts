@@ -11,9 +11,7 @@ export class Print {
   interval: NodeJS.Timeout | null = null
   private static instance: Print | null = null
 
-  private constructor() {
-    // 私有构造函数，确保不能在外部创建实例
-  }
+  private constructor() {}
 
   static getInstance() {
     if (!Print.instance)
@@ -25,6 +23,7 @@ export class Print {
     const l = prefixText.length || 0
     const startWith = prefixText
 
+    // eslint-disable-next-line ts/no-unused-expressions
     withOra && spinner?.start(startWith)
     this.interval = setInterval(() => {
       if (withOra) {

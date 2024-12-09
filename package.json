@@ -55,26 +55,20 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
-    "@commitlint/cli": "^19.1.0",
-    "@commitlint/config-conventional": "^19.1.0",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "@types/node": "^20.11.24",
     "bumpp": "^9.4.0",
-    "commitizen": "^4.3.0",
-    "cz-git": "^1.9.4",
+    "commitizen": "^4.3.1",
+    "cz-git": "^1.11.0",
     "eslint": "^8.57.0",
     "eslint-plugin-format": "^0.1.0",
     "execa": "^8.0.1",
     "fast-glob": "^3.3.2",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint --edit $1"
-    }
   },
   "lint-staged": {
     "*": "eslint . --fix"

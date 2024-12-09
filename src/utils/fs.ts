@@ -15,7 +15,7 @@ export function getPackageJSON(): any {
       const data = JSON.parse(raw)
       return data
     }
-    catch (e) {
+    catch (_e) {
       Print.getInstance().err('Failed to parse package.json.')
       process.exit(1)
     }
@@ -26,7 +26,7 @@ export async function writePackageJSON(data: AnyKey) {
   try {
     await w('package.json', `${JSON.stringify(data, null, 2)}\n`)
   }
-  catch (error) {
+  catch (_error) {
     Print.getInstance().err('Failed to write in package.json.')
     process.exit(1)
   }

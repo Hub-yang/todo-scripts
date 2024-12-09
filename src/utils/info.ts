@@ -12,7 +12,7 @@ export function getPkgInfo() {
     const data = JSON.parse(raw)
     return data
   }
-  catch (e) {
+  catch (_e) {
     return {}
   }
 }

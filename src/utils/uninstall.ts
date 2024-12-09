@@ -11,7 +11,7 @@ export async function uninstallPackages(pkg: string) {
     await execaCommand(command)
     spinner.succeed(`succeed to uninstall ${pkg}!`)
   }
-  catch (error) {
+  catch (_error) {
     Print.getInstance().err(`Failed to uninstall ${pkg}.`)
     process.exit(1)
   }
