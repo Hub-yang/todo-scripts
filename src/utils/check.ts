@@ -1,6 +1,6 @@
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
-import { existsSync } from 'node:fs'
 import { execaCommand } from 'execa'
 import { importPackage } from './import'
 

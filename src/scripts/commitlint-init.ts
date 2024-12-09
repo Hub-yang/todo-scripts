@@ -1,15 +1,14 @@
-#!/usr/bin/env node
-import { writeFile as w } from 'node:fs/promises'
+import type { AnyKey } from '../../global'
 import { existsSync } from 'node:fs'
+import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import ora from 'ora'
-import { checkPackage } from '../utils/check'
-import { Print } from '../utils/print'
-import { getPackageJSON, writePackageJSON } from '../utils/fs'
-import { execCommand } from '../utils/exec'
-import type { AnyKey } from '../../global'
 import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_PRE } from '../constants'
+import { checkPackage } from '../utils/check'
+import { execCommand } from '../utils/exec'
+import { getPackageJSON, writePackageJSON } from '../utils/fs'
+import { Print } from '../utils/print'
 
 export async function main(options: AnyKey) {
   const useCZGit = options.includes('--czgit')

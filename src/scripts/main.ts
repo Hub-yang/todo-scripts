@@ -1,8 +1,8 @@
 import process from 'node:process'
-import { uninstallPackages } from '../utils/uninstall'
-import { computeTimeConsuming } from '../utils/timeConsuming'
-import { Print } from '../utils/print'
 import { consoleInfo } from '../utils/console'
+import { Print } from '../utils/print'
+import { computeTimeConsuming } from '../utils/timeConsuming'
+import { uninstallPackages } from '../utils/uninstall'
 
 // print
 consoleInfo()

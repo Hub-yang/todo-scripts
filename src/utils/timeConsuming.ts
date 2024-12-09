@@ -1,6 +1,6 @@
-import ora from 'ora'
-import chalk from 'chalk'
 import type { AnyKey } from '../../global'
+import chalk from 'chalk'
+import ora from 'ora'
 import { Print } from './print'
 
 type MainCallBack = (options?: AnyKey) => Promise<void>

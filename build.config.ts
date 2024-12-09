@@ -1,6 +1,6 @@
 import { basename } from 'node:path'
-import { defineBuildConfig } from 'unbuild'
 import fg from 'fast-glob'
+import { defineBuildConfig } from 'unbuild'
 
 export default defineBuildConfig({
   entries: [

@@ -1,5 +1,5 @@
-import process from 'node:process'
 import type { ModuleDesc } from './check'
+import process from 'node:process'
 import { Print } from './print'
 
 export async function importPackage(packageName: string): Promise<ModuleDesc> {

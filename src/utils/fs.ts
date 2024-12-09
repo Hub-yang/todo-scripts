@@ -1,8 +1,8 @@
-import { resolve } from 'node:path'
-import fs from 'node:fs'
-import process from 'node:process'
-import { writeFile as w } from 'node:fs/promises'
 import type { AnyKey } from '../../global'
+import fs from 'node:fs'
+import { writeFile as w } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import process from 'node:process'
 import { Print } from './print'
 
 export function getPackageJSON(): any {

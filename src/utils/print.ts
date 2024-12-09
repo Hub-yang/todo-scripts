@@ -23,7 +23,6 @@ export class Print {
     const l = prefixText.length || 0
     const startWith = prefixText
 
-    // eslint-disable-next-line ts/no-unused-expressions
     withOra && spinner?.start(startWith)
     this.interval = setInterval(() => {
       if (withOra) {
