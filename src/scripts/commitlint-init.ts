@@ -4,7 +4,7 @@ import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import ora from 'ora'
-import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_PRE } from '../constants'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '../constants'
 import { checkPackage } from '../utils/check'
 import { execCommand } from '../utils/exec'
 import { getPackageJSON, writePackageJSON } from '../utils/fs'
@@ -43,6 +43,7 @@ export async function main(options: AnyKey) {
   spinner.start('husky config running...')
   await execCommand('npx husky init')
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
+  await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   spinner.succeed('husky config succeed!')
 
   // write in package.json
