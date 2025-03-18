@@ -1,13 +1,13 @@
-import chalk from 'chalk'
+import pico from 'picocolors'
 import terminalLink from 'terminal-link'
 import { getPkgInfo } from './info'
 
 export function consoleInfo() {
   let { version = '--', author = 'HuberyYang', name = '@huberyyang/todo-scripts', homepage = 'https://github.com/Hub-yang/todo-scripts' } = getPkgInfo()
-  version = chalk.blue(`version ${version}`)
-  name = chalk.bold.italic(name)
-  author = chalk.blue(`author ${author}`)
-  homepage = chalk.dim(`(${homepage})`)
+  version = pico.blue(`version ${version}`)
+  name = pico.bold(pico.italic(name))
+  author = pico.blue(`author ${author}`)
+  homepage = pico.dim(`(${homepage})`)
 
   const link_version = terminalLink(version, 'https://www.npmjs.com/package/@huberyyang/todo-scripts')
   const link_name = terminalLink(name, 'https://github.com/Hub-yang/todo-scripts')

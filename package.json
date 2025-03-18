@@ -49,8 +49,8 @@
     "cz": "git cz"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
     "ora": "^8.0.1",
+    "picocolors": "^1.1.1",
     "terminal-link": "^3.0.0"
   },
   "devDependencies": {

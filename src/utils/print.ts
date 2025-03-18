@@ -1,5 +1,5 @@
 import process from 'node:process'
-import chalk from 'chalk'
+import pico from 'picocolors'
 
 interface PrintOptions {
   prefixText: string
@@ -45,13 +45,13 @@ export class Print {
 
   warn(warnMsg: any) {
     console.log(' ')
-    console.log(`${chalk.bgYellow(' WARN ')} ${warnMsg}`)
+    console.log(`${pico.bgYellow(' WARN ')} ${warnMsg}`)
     console.log(' ')
   }
 
   err(errMsg: any) {
     console.log(' ')
-    console.log(`${chalk.bgRed(' ERROR ')} ${errMsg}`)
+    console.log(`${pico.bgRed(' ERROR ')} ${errMsg}`)
     console.log(' ')
   }
 
