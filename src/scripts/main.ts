@@ -1,4 +1,5 @@
 import process from 'node:process'
+import ora from 'ora'
 import { consoleInfo } from '../utils/console'
 import { Print } from '../utils/print'
 import { computeTimeConsuming } from '../utils/timeConsuming'
@@ -21,6 +22,7 @@ const scriptsMap = ['commitlint-init']
     // Check whether to uninstall
     if (options.includes('--clear')) {
       await uninstallPackages('@huberyyang/todo-scripts')
+      ora().succeed(`clear down!`)
       process.exit()
     }
   }

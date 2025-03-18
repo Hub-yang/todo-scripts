@@ -5,11 +5,16 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import { Print } from './print'
 
+export function havePackageJSON() {
+  const cwd = process.cwd()
+  const path = resolve(cwd, 'package.json')
+  return fs.existsSync(path)
+}
+
 export function getPackageJSON(): any {
   const cwd = process.cwd()
   const path = resolve(cwd, 'package.json')
-
-  if (fs.existsSync(path)) {
+  if (havePackageJSON()) {
     try {
       const raw = fs.readFileSync(path, 'utf-8')
       const data = JSON.parse(raw)
