@@ -5,7 +5,7 @@ on:
     branches:
       - main # 根据实际分支名修改（如 master）
     paths:
-      - package.json # 监控所有文件变更（可根据需要调整）
+      - '**' # 监控所有文件变更（可根据需要调整）
 
 jobs:
   release:
