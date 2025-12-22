@@ -40,16 +40,21 @@
   ],
   "scripts": {
     "build": "unbuild",
+    "build:prod": "npm run type-check && npm run lint:fix && npm run build",
+    "dev": "unbuild --stub",
     "release": "bumpp && npm publish",
-    "lint": "eslint .",
     "test": "vitest",
+    "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
     "taze": "npx taze major -r",
     "prepare": "husky",
     "commitlint": "commitlint --edit",
     "cz": "git cz"
   },
   "dependencies": {
+    "mri": "^1.2.0",
     "ora": "^8.0.1",
     "picocolors": "^1.1.1",
     "terminal-link": "^3.0.0"

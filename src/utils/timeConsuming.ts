@@ -1,4 +1,3 @@
-import type { AnyKey } from '../../global'
 import ora from 'ora'
 import pico from 'picocolors'
 import { Print } from './print'

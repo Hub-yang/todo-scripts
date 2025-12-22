@@ -9,7 +9,7 @@ export default defineBuildConfig({
       name: basename(i).slice(0, -3),
     })),
   ],
-  // Generates .d.ts declaration file
+  // Generates .d.ts declaration files
   declaration: true,
   rollup: {
     emitCJS: true,

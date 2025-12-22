@@ -1,4 +1,3 @@
-import type { AnyKey } from '../../global'
 import fs from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
@@ -11,7 +10,7 @@ export function havePackageJSON() {
   return fs.existsSync(path)
 }
 
-export function getPackageJSON(): any {
+export function getPackageJSON(): void {
   const cwd = process.cwd()
   const path = resolve(cwd, 'package.json')
   if (havePackageJSON()) {

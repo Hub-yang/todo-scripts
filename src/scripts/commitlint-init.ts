@@ -1,4 +1,3 @@
-import type { AnyKey } from '../../global'
 import { existsSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
@@ -11,7 +10,7 @@ import { getPackageJSON, writePackageJSON } from '../utils/fs'
 import { Print } from '../utils/print'
 
 export async function main(options: AnyKey) {
-  const useCZGit = options.includes('--czgit')
+  const useCZGit = options.czgit
   const print = Print.getInstance()
   const spinner = ora()
 
