@@ -60,6 +60,14 @@ export async function main(options: AnyKey) {
     }
     o.scripts.cz = 'git cz'
   }
+  else {
+    if (o.config?.commitizen) {
+      delete o.config.commitizen
+    }
+    if (o.scripts?.cz) {
+      delete o.scripts.cz
+    }
+  }
   await writePackageJSON(o)
   spinner.succeed('package.json writting succeed!')
 

@@ -1,5 +1,5 @@
 export const CONFIG_COMMITLINT
-= `export default {
+  = `export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [2, 'always', [
@@ -21,7 +21,7 @@ export const CONFIG_COMMITLINT
 }`
 
 export const CONFIG_COMMITLINT_CZGIT
-= `/** @type {import('cz-git').UserConfig} */
+  = `/** @type {import('cz-git').UserConfig} */
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
