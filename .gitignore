@@ -1,5 +1,91 @@
+# ##################################################################
+#  Universal Frontend .gitignore Template (2026 huberyyang)
+# ##################################################################
+
+# --- 依赖包 (Dependencies) ---
+node_modules/
+jspm_packages/
+web_modules/
+
+# --- 构建产物 (Build Outputs) ---
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+.astro/
+.cache/
+.parcel-cache/
+.turbo/
+target/
+
+# --- 日志文件 (Logs) ---
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- 环境变量 (Environment Variables) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env.veg
+.secret
+*.pem
+
+# --- 操作系统及 IDE (OS & IDEs) ---
 .DS_Store
-node_modules
-dist
-.idea
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- 测试与覆盖率 (Testing & Coverage) ---
+coverage/
+*.lcov
+.nyc_output
+.cypress-cache/
+cypress/videos/
+cypress/screenshots/
+__snapshots__/
+
+# --- 缓存与临时文件 (Cache & Temporary) ---
+.eslintcache
+.stylelintcache
+.prettiercache
+.rpt2_cache/
+.rts2_cache_daemon/
+.rts2_cache_umd/
+.rts2_cache_cjs/
+.node_repl_history
+.yarn-integrity
+.cache/
+.tsbuildinfo
+
+# --- 包管理器特定文件 (Package Manager Specific) ---
+# 如果你使用 Yarn Berry (v2+)，根据你的策略决定是否注释掉以下内容
+# .yarn/*
+# !.yarn/releases
+# !.yarn/plugins
+# !.yarn/sdks
+# !.yarn/versions
+
+# --- 其它 (Misc) ---
+/site
+.serverless/
+.fusebox/
+.dynamodb/
+*.tgz
