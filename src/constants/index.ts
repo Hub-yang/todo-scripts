@@ -106,3 +106,6 @@ export default {
 export const WRITE_COMMIT_PRE = `pnpm lint-staged`
 // eslint-disable-next-line no-template-curly-in-string
 export const WRITE_COMMIT_MSG = 'pnpm commitlint ${1}'
+
+export const DEFAULT_PKG_NAME = '@huberyyang/todo-scripts'
+export const REPO_URL = 'https://github.com/Hub-yang/todo-scripts'

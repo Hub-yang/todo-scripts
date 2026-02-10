@@ -1,18 +1,17 @@
+import type { AnyKey } from '@/utils'
 import { existsSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
-import ora from 'ora'
-import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '../constants'
-import { checkPackage } from '../utils/check'
-import { execCommand } from '../utils/exec'
-import { getPackageJSON, writePackageJSON } from '../utils/fs'
-import { Print } from '../utils/print'
+import yoctoSpinner from 'yocto-spinner'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '@/constants'
+import { checkPackage, execCommand, getPackageJSON, isRootFileExist, writePackageJSON } from '@/utils'
+import { Print } from '@/utils/print'
 
-export async function main(options: AnyKey) {
+export async function init(options: AnyKey) {
   const useCZGit = options.czgit
   const print = Print.getInstance()
-  const spinner = ora()
+  const spinner = yoctoSpinner()
 
   // check git
   const cwd = process.cwd()
@@ -20,30 +19,32 @@ export async function main(options: AnyKey) {
   if (!existsSync(path)) {
     spinner.start('git init checking...')
     await execCommand('git init')
-    spinner.succeed('git init down!')
+    spinner.success('git init down!')
   }
 
   // start install
-  print.startWithDots({ prefixText: 'install running', withOra: true, spinner })
-  const pkgs: string[] = ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged']
+  print.startWithDots({ prefixText: 'install running', spinner })
+  const pkgs = ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged']
   if (useCZGit)
     pkgs.push('commitizen', 'cz-git')
   for await (const pkg of pkgs)
     await checkPackage({ packageName: pkg, saveMode: '--save-dev' })
   print.clear(true)
-  spinner.succeed('install succeed!')
+  spinner.success('install succeed!')
 
-  // create commitlint.config.js and write in options
+  // create commitlint config file
   spinner.start('commitlint config running...')
-  await w('commitlint.config.js', useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT)
-  spinner.succeed('commitlint config succeed!')
+  const name = isRootFileExist('tsconfig.json') ? 'commitlint.config.ts' : 'commitlint.config.js'
+  const content = useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT
+  await w(name, content)
+  spinner.success('commitlint config succeed!')
 
   // config husky
   spinner.start('husky config running...')
   await execCommand('npx husky init')
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
   await w('.husky/commit-msg', WRITE_COMMIT_MSG)
-  spinner.succeed('husky config succeed!')
+  spinner.success('husky config succeed!')
 
   // write in package.json
   spinner.start('package.json writting...')
@@ -69,19 +70,19 @@ export async function main(options: AnyKey) {
     }
   }
   await writePackageJSON(o)
-  spinner.succeed('package.json writting succeed!')
+  spinner.success('package.json writting succeed!')
 
   // lint if exit
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
-    print.startWithDots({ prefixText: 'lint running', withOra: true, spinner })
+    print.startWithDots({ prefixText: 'lint running', spinner })
     let o = getPackageJSON() as any
-    (o.scripts ||= {})['hubery:fix'] = `eslint package.json commitlint.config.js --fix || true`
+    (o.scripts ||= {})['__hubery__:fix'] = `eslint package.json ${name} --fix || true`
     await writePackageJSON(o)
     await execCommand('pnpm run hubery:fix')
     o = getPackageJSON()
-    delete o.scripts['hubery:fix']
+    delete o.scripts['__hubery__:fix']
     await writePackageJSON(o)
     print.clear(true)
-    spinner.succeed('lint down!')
+    spinner.success('lint down!')
   }
 }

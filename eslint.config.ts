@@ -7,4 +7,9 @@ export default antfu({
     'no-console': 'off',
     'unused-imports/no-unused-vars': 'off',
   },
+  ignores: [
+    '**/node_modules/**',
+    'template-*',
+    '**/dist/**',
+  ],
 })

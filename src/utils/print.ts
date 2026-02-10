@@ -1,11 +1,13 @@
 import process from 'node:process'
-import pico from 'picocolors'
+import colors from 'picocolors'
 
 interface PrintOptions {
   prefixText: string
   withOra?: boolean
   spinner?: any
 }
+
+const { bgYellow, bgRed } = colors
 
 export class Print {
   interval: NodeJS.Timeout | null = null
@@ -19,11 +21,11 @@ export class Print {
     return Print.instance
   }
 
-  startWithDots({ prefixText = '', withOra, spinner }: PrintOptions) {
+  startWithDots({ prefixText = '', withOra = true, spinner }: PrintOptions) {
     const l = prefixText.length || 0
     const startWith = prefixText
 
-    withOra && spinner?.start(startWith)
+    withOra && spinner.start(startWith)
     this.interval = setInterval(() => {
       if (withOra) {
         spinner.text = prefixText
@@ -39,19 +41,19 @@ export class Print {
     }, 400)
   }
 
-  log(logMsg: any) {
+  log(logMsg: string) {
     console.log(logMsg)
   }
 
-  warn(warnMsg: any) {
+  warn(warnMsg: string) {
     console.log(' ')
-    console.log(`${pico.bgYellow(' WARN ')} ${warnMsg}`)
+    console.log(`${bgYellow(' WARN ')} ${warnMsg}`)
     console.log(' ')
   }
 
-  err(errMsg: any) {
+  err(errMsg: string) {
     console.log(' ')
-    console.log(`${pico.bgRed(' ERROR ')} ${errMsg}`)
+    console.log(`${bgRed(' ERROR ')} ${errMsg}`)
     console.log(' ')
   }
 
