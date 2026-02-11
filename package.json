@@ -1,7 +1,7 @@
 {
   "name": "@huberyyang/todo-scripts",
   "type": "module",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "packageManager": "pnpm@10.29.2",
   "description": "Some public executable scripts",
   "author": "HuberyYang",
@@ -38,7 +38,7 @@
     "build:prod": "nr typecheck && nr lint:fix && tsdown",
     "test": "vitest",
     "typecheck": "tsc",
-    "release": "nr build && bumpp && npm publish --access public --tag beta",
+    "release": "nr build && bumpp && npm publish",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "taze": "npx taze major -r",
