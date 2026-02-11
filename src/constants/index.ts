@@ -1,4 +1,20 @@
+import { green } from 'picocolors'
 import { getExecCommand } from '@/utils'
+
+export const HELP_MESSAGE = `\
+一些帮助简化前端配置工程的通用脚本
+
+可用指令:
+${green('commitlint-init')}
+
+用法: hubery commitlint-init [参数]...
+
+一键生成 commitlint + husky + lint-staged 配置
+
+参数:
+  -h, --help                         查看帮助
+  --clear                            清洁执行 - 执行完脚本后卸载模块
+  --czgit                            配置 cz-git\n`
 
 export const CONFIG_COMMITLINT
   = `export default {

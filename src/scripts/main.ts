@@ -2,7 +2,7 @@ import process from 'node:process'
 import mri from 'mri'
 import colors from 'picocolors'
 import spinner from 'yocto-spinner'
-import { DEFAULT_PKG_NAME } from '@/constants'
+import { DEFAULT_PKG_NAME, HELP_MESSAGE } from '@/constants'
 import { banner, uninstallPkg } from '@/utils'
 import { Print } from '@/utils/print'
 
@@ -22,6 +22,11 @@ async function main() {
     boolean: ['clear', 'czgit', 'help'],
     alias: { h: 'help' },
   })
+
+  if (options.help) {
+    console.log(HELP_MESSAGE)
+    return false
+  }
 
   if (script && scriptsMap.includes(script)) {
     const { init } = await import(`./${script}.js`)
