@@ -42,7 +42,7 @@ export async function init(options: AnyKey) {
   // config husky
   spinner.start('husky config running...')
   const command = getExecCommand()
-  await execCommand(`${command} husky init`)
+  await execCommand(`${command}husky init`)
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
   await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   spinner.success('husky config succeed!')
@@ -77,12 +77,13 @@ export async function init(options: AnyKey) {
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
     print.startWithDots({ prefixText: 'lint running', spinner })
     let o = getPackageJSON() as any
-    (o.scripts ||= {})['__hubery__:fix'] = `eslint package.json ${name} --fix || true`
+    const LINT_SCRIPT = '__hubery__:fix'
+    ;(o.scripts ||= {})[LINT_SCRIPT] = `eslint package.json ${name} --fix || true`
     await writePackageJSON(o)
     const runCommand = getRunCommand()
-    await execCommand(`${runCommand} hubery:fix`)
+    await execCommand(`${runCommand} ${LINT_SCRIPT}`)
     o = getPackageJSON()
-    delete o.scripts['__hubery__:fix']
+    delete o.scripts[LINT_SCRIPT]
     await writePackageJSON(o)
     print.clear(true)
     spinner.success('lint down!')

@@ -1,4 +1,4 @@
-import { getPkgManager } from '@/utils'
+import { getExecCommand } from '@/utils'
 
 export const CONFIG_COMMITLINT
   = `export default {
@@ -105,7 +105,7 @@ export default {
 }
 `
 
-export const WRITE_COMMIT_PRE = `${getPkgManager()} lint-staged`
-export const WRITE_COMMIT_MSG = `${getPkgManager()} commitlint ${1}`
+export const WRITE_COMMIT_PRE = `${getExecCommand()}lint-staged`
+export const WRITE_COMMIT_MSG = `${getExecCommand()}commitlint --edit "$1"`
 export const DEFAULT_PKG_NAME = '@huberyyang/todo-scripts'
 export const REPO_URL = 'https://github.com/Hub-yang/todo-scripts'

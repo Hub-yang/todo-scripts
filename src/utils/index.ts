@@ -25,6 +25,11 @@ interface ModuleDesc {
   module: any
 }
 
+interface PkgInfo {
+  name: string
+  version: string
+}
+
 const { bold, italic, blue, dim } = colors
 
 /**
@@ -223,9 +228,9 @@ export async function writePackageJSON(data: AnyKey) {
 
 /**
  * get the current package manager from user agent
- * @returns {string | undefined} package manager name
+ * @returns {PkgInfo} package manager info, include name and version
  */
-export function getPkgManager(): string | undefined {
+export function getPkgManager(): PkgInfo | undefined {
   const userAgent = process.env.npm_config_user_agent
   if (!userAgent) {
     return undefined
@@ -233,7 +238,10 @@ export function getPkgManager(): string | undefined {
 
   const pkgSpec = userAgent.split(' ')[0]
   const pkgSpecArr = pkgSpec.split('/')
-  return pkgSpecArr[0] || 'npm'
+  return {
+    name: pkgSpecArr[0],
+    version: pkgSpecArr[1],
+  }
 }
 
 /**
@@ -241,8 +249,8 @@ export function getPkgManager(): string | undefined {
  * @returns {string} package manager install command
  */
 export function getInstallCommand(): string {
-  const pkgManager = getPkgManager()
-  return pkgManager === 'npm' ? `${pkgManager} install` : `${pkgManager} add`
+  const pkgManager = getPkgManager()?.name || 'npm'
+  return `${pkgManager} install`
 }
 
 /**
@@ -250,7 +258,7 @@ export function getInstallCommand(): string {
  * @returns {string} package manager uninstall command
  */
 export function getUninstallCommand(): string {
-  const pkgManager = getPkgManager()
+  const pkgManager = getPkgManager()?.name || 'npm'
   return pkgManager === 'npm' ? `${pkgManager} uninstall` : `${pkgManager} remove`
 }
 
@@ -259,8 +267,8 @@ export function getUninstallCommand(): string {
  * @returns {string} package manager run command
  */
 export function getRunCommand(): string {
-  const pkgManager = getPkgManager()
-  return pkgManager === 'yarn' ? `${pkgManager}` : `${pkgManager} run`
+  const pkgManager = getPkgManager()?.name || 'npm'
+  return `${pkgManager} run`
 }
 
 /**
@@ -268,19 +276,19 @@ export function getRunCommand(): string {
  * @returns {string} package manager exec command
  */
 export function getExecCommand(): string {
-  const pkgManager = getPkgManager()
+  const pkgManager = getPkgManager()?.name || 'npm'
   switch (pkgManager) {
     case 'npm':
-      return 'npm exec'
+      return 'npx '
     case 'pnpm':
-      return 'pnpm dlx'
+      return 'pnpm exec '
     case 'yarn':
-      return 'yarn dlx'
+      return 'yarn '
     case 'bun':
-      return 'bun x'
+      return 'bunx '
     case 'deno':
       return 'deno run -A npm:'
     default:
-      return 'npm exec'
+      return 'npx'
   }
 }
