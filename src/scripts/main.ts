@@ -31,7 +31,7 @@ async function main() {
   if (script && scriptsMap.includes(script)) {
     const { init } = await import(`./${script}.js`)
     const startTime = +new Date()
-    console.log(`\n⚡️ ${bold(green('Process Start'))}\n`)
+    console.log(`⚡️ ${bold(green('Process Start'))}\n`)
 
     await init(options)
 
