@@ -57,25 +57,28 @@ export function banner() {
   const lineThree = `⦚${' '.repeat(l_init - 2 - l_version - 'version'.length - 1)}${isSupportLink ? link_version : version}⦚`
   const lineFour = `⦚${' '.repeat(l_init - 2 - l_author - 'author'.length - 1)}${isSupportLink ? link_author : author}⦚`
 
+  let banner
   if (isSupportLink) {
-    console.log(`
-     ${lineBase}
-     ${lineOne}
-     ${lineTwo}
-     ${lineThree}
-     ${lineFour}
-     ${lineBase}`)
+    banner
+      = `\n${lineBase}
+${lineOne}
+${lineTwo}
+${lineThree}
+${lineFour}
+${lineBase}\n`
   }
   else {
-    console.log(`
-     ${lineBase}
-     ${lineOne}
-     ${lineTwo}
-     ${lineThree}
-     ${lineFour}
-     ${lineBase}
-     ${homepage}`)
+    banner
+      = `\n${lineBase}
+${lineOne}
+${lineTwo}
+${lineThree}
+${lineFour}
+${lineBase}
+${homepage}\n`
   }
+
+  console.log(banner)
 }
 
 /**
