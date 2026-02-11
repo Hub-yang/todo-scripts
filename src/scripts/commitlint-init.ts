@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
 import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '@/constants'
-import { checkPackage, execCommand, getPackageJSON, isRootFileExist, writePackageJSON } from '@/utils'
+import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isRootFileExist, writePackageJSON } from '@/utils'
 import { Print } from '@/utils/print'
 
 export async function init(options: AnyKey) {
@@ -41,7 +41,8 @@ export async function init(options: AnyKey) {
 
   // config husky
   spinner.start('husky config running...')
-  await execCommand('npx husky init')
+  const command = getExecCommand()
+  await execCommand(`${command} husky init`)
   await w('.husky/pre-commit', WRITE_COMMIT_PRE)
   await w('.husky/commit-msg', WRITE_COMMIT_MSG)
   spinner.success('husky config succeed!')
@@ -78,7 +79,8 @@ export async function init(options: AnyKey) {
     let o = getPackageJSON() as any
     (o.scripts ||= {})['__hubery__:fix'] = `eslint package.json ${name} --fix || true`
     await writePackageJSON(o)
-    await execCommand('pnpm run hubery:fix')
+    const runCommand = getRunCommand()
+    await execCommand(`${runCommand} hubery:fix`)
     o = getPackageJSON()
     delete o.scripts['__hubery__:fix']
     await writePackageJSON(o)
