@@ -34,7 +34,8 @@ export async function init(options: AnyKey) {
 
   // create commitlint config file
   spinner.start('commitlint config running...')
-  const name = isRootFileExist('tsconfig.json') ? 'commitlint.config.ts' : 'commitlint.config.js'
+  const isTsRepo = isRootFileExist('tsconfig.json') || isRootFileExist('tsconfig.base.json')
+  const name = isTsRepo ? 'commitlint.config.ts' : 'commitlint.config.js'
   const content = useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT
   await w(name, content)
   spinner.success('commitlint config succeed!')
@@ -48,7 +49,7 @@ export async function init(options: AnyKey) {
   spinner.success('husky config succeed!')
 
   // write in package.json
-  spinner.start('package.json writting...')
+  spinner.start('package.json writing...')
   const o = getPackageJSON() as any
   (o.scripts ||= {}).commitlint = 'commitlint --edit'
   o['lint-staged'] = {
@@ -71,7 +72,7 @@ export async function init(options: AnyKey) {
     }
   }
   await writePackageJSON(o)
-  spinner.success('package.json writting succeed!')
+  spinner.success('package.json writing succeed!')
 
   // lint if exit
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
