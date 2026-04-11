@@ -23,6 +23,19 @@ yarn add --dev @huberyyang/todo-scripts
 bun add --dev @huberyyang/todo-scripts
 ```
 
+如果你的项目是 **monorepo**，请使用以下命令安装到工作区根目录：
+
+```shell
+# pnpm
+pnpm add -wD @huberyyang/todo-scripts
+# yarn
+yarn add -W --dev @huberyyang/todo-scripts
+# npm
+npm install --save-dev @huberyyang/todo-scripts
+# bun
+bun add --dev @huberyyang/todo-scripts
+```
+
 ### 🔌 当前可用指令 (Current Script)
 
 - `commitlint-init`

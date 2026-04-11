@@ -199,6 +199,18 @@ export function isRootFileExist(file: string): boolean {
 }
 
 /**
+ * check whether the project is a monorepo
+ * by detecting pnpm-workspace.yaml or workspaces field in package.json
+ * @returns {boolean} - result
+ */
+export function isMonorepo(): boolean {
+  if (isRootFileExist('pnpm-workspace.yaml'))
+    return true
+  const pkg = getPackageJSON()
+  return !!(pkg?.workspaces)
+}
+
+/**
  * check whether the project is a TypeScript project
  * by scanning for tsconfig*.json files in the project root
  * @returns {boolean} - result
@@ -266,6 +278,13 @@ export function getPkgManager(): PkgInfo | undefined {
  */
 export function getInstallCommand(): string {
   const pkgManager = getPkgManager()?.name || 'npm'
+  const monorepo = isMonorepo()
+  if (monorepo) {
+    if (pkgManager === 'pnpm')
+      return 'pnpm add -w'
+    if (pkgManager === 'yarn')
+      return 'yarn add -W'
+  }
   return `${pkgManager} install`
 }
 
@@ -275,7 +294,15 @@ export function getInstallCommand(): string {
  */
 export function getUninstallCommand(): string {
   const pkgManager = getPkgManager()?.name || 'npm'
-  return pkgManager === 'npm' ? `${pkgManager} uninstall` : `${pkgManager} remove`
+  const monorepo = isMonorepo()
+  const base = pkgManager === 'npm' ? `${pkgManager} uninstall` : `${pkgManager} remove`
+  if (monorepo) {
+    if (pkgManager === 'pnpm')
+      return `${base} -w`
+    if (pkgManager === 'yarn')
+      return `${base} -W`
+  }
+  return base
 }
 
 /**
