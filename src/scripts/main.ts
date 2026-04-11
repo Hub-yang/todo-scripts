@@ -30,12 +30,12 @@ async function main() {
 
   if (script && scriptsMap.includes(script)) {
     const { init } = await import(`./${script}.js`)
-    const startTime = +new Date()
-    console.log(`\n⚡️ ${bold(green('Process Start'))}\n`)
+    const startTime = Date.now()
+    console.log(`⚡️ ${bold(green('Process Start'))}\n`)
 
     await init(options)
 
-    const endTime = +new Date()
+    const endTime = Date.now()
     const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
     console.log(`\n✨ ${green(bold('Process Down')) + bold(` in ${elapsedTime}s`)}\n`)
     // Check whether to uninstall

@@ -60,7 +60,7 @@ export function banner() {
   let banner
   if (isSupportLink) {
     banner
-      = `\n${lineBase}
+      = `${lineBase}
 ${lineOne}
 ${lineTwo}
 ${lineThree}
