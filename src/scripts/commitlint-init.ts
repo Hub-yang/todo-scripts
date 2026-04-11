@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
 import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '@/constants'
-import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isRootFileExist, writePackageJSON } from '@/utils'
+import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isTsProject, writePackageJSON } from '@/utils'
 import { Print } from '@/utils/print'
 
 export async function init(options: AnyKey) {
@@ -34,8 +34,7 @@ export async function init(options: AnyKey) {
 
   // create commitlint config file
   spinner.start('commitlint config running...')
-  const isTsRepo = isRootFileExist('tsconfig.json') || isRootFileExist('tsconfig.base.json')
-  const name = isTsRepo ? 'commitlint.config.ts' : 'commitlint.config.js'
+  const name = isTsProject() ? 'commitlint.config.ts' : 'commitlint.config.js'
   const content = useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT
   await w(name, content)
   spinner.success('commitlint config succeed!')

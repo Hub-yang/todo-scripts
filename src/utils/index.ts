@@ -1,4 +1,6 @@
-import fs, { existsSync } from 'node:fs'
+/* eslint-disable e18e/prefer-static-regex */
+/* eslint-disable regexp/no-unused-capturing-group */
+import fs, { existsSync, readdirSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import path, { resolve } from 'node:path'
 import process from 'node:process'
@@ -194,6 +196,17 @@ export function isRootFileExist(file: string): boolean {
   const cwd = process.cwd()
   const path = resolve(cwd, file)
   return fs.existsSync(path)
+}
+
+/**
+ * check whether the project is a TypeScript project
+ * by scanning for tsconfig*.json files in the project root
+ * @returns {boolean} - result
+ */
+export function isTsProject(): boolean {
+  const cwd = process.cwd()
+  const files = readdirSync(cwd)
+  return files.some(file => /^tsconfig(\..*)?\.json$/.test(file))
 }
 
 /**
