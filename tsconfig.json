@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "baseUrl": ".",
     "module": "Preserve",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["node"],
     "allowImportingTsExtensions": true,
