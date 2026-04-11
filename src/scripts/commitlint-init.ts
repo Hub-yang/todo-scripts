@@ -6,11 +6,9 @@ import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
 import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '@/constants'
 import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isTsProject, writePackageJSON } from '@/utils'
-import { Print } from '@/utils/print'
 
 export async function init(options: AnyKey) {
   const useCZGit = options.czgit
-  const print = Print.getInstance()
   const spinner = yoctoSpinner()
 
   // check git
@@ -23,13 +21,12 @@ export async function init(options: AnyKey) {
   }
 
   // start install
-  print.startWithDots({ prefixText: 'install running', spinner })
+  spinner.start('install running')
   const pkgs = ['@commitlint/cli', '@commitlint/config-conventional', 'husky', 'lint-staged']
   if (useCZGit)
     pkgs.push('commitizen', 'cz-git')
   for await (const pkg of pkgs)
     await checkPackage({ packageName: pkg, saveMode: '--save-dev' })
-  print.clear(true)
   spinner.success('install succeed!')
 
   // create commitlint config file
@@ -75,7 +72,7 @@ export async function init(options: AnyKey) {
 
   // lint if exit
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
-    print.startWithDots({ prefixText: 'lint running', spinner })
+    spinner.start('lint running')
     let o = getPackageJSON() as any
     const LINT_SCRIPT = '__hubery__:fix'
     ;(o.scripts ||= {})[LINT_SCRIPT] = `eslint package.json ${name} --fix || true`
@@ -85,7 +82,6 @@ export async function init(options: AnyKey) {
     o = getPackageJSON()
     delete o.scripts[LINT_SCRIPT]
     await writePackageJSON(o)
-    print.clear(true)
     spinner.success('lint down!')
   }
 }

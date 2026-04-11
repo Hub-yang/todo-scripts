@@ -8,9 +8,8 @@ import { fileURLToPath } from 'node:url'
 import { execaCommand } from 'execa'
 import colors from 'picocolors'
 import terminalLink from 'terminal-link'
-import spinner from 'yocto-spinner'
+import yoctoSpinner from 'yocto-spinner'
 import { DEFAULT_PKG_NAME, REPO_URL } from '@/constants'
-import { Print } from './print'
 
 export interface AnyKey {
   [key: string]: any
@@ -32,7 +31,25 @@ interface PkgInfo {
   version: string
 }
 
-const { bold, italic, blue, dim } = colors
+const { bold, italic, blue, dim, bgYellow, bgRed } = colors
+
+/**
+ * print warning message
+ */
+export function printWarn(msg: string) {
+  console.log(' ')
+  console.log(`${bgYellow(' WARN ')} ${msg}`)
+  console.log(' ')
+}
+
+/**
+ * print error message
+ */
+export function printErr(msg: string) {
+  console.log(' ')
+  console.log(`${bgRed(' ERROR ')} ${msg}`)
+  console.log(' ')
+}
 
 /**
  * print banner
@@ -106,20 +123,17 @@ function getPkgInfo() {
  * @param {string} pkg - package name
  */
 export async function uninstallPkg(pkg: string) {
-  const print = Print.getInstance()
+  const s = yoctoSpinner({ text: 'uninstall running' }).start()
   try {
-    print.startWithDots({ prefixText: 'uninstall running', spinner: spinner() })
     const uninstallCommand = getUninstallCommand()
     const command = `${uninstallCommand} ${pkg}`
     await execaCommand(command)
-    spinner().success(`succeed to uninstall ${pkg}!`)
+    s.success(`succeed to uninstall ${pkg}!`)
   }
   catch (_e) {
-    print.err(`Failed to uninstall ${pkg}.`)
+    s.stop()
+    printErr(`Failed to uninstall ${pkg}.`)
     process.exit(1)
-  }
-  finally {
-    print.clear(true)
   }
 }
 
@@ -135,7 +149,7 @@ export async function importPkg(pkg: string) {
     }
   }
   catch (_e) {
-    Print.getInstance().err(`Failed to import ${pkg}.`)
+    printErr(`Failed to import ${pkg}.`)
     process.exit(1)
   }
 }
@@ -149,7 +163,7 @@ export async function execCommand(command: string) {
     await execaCommand(command)
   }
   catch (_error) {
-    Print.getInstance().err(`Failed to execute '${command}'.`)
+    printErr(`Failed to execute '${command}'.`)
     process.exit(1)
   }
 }
@@ -234,7 +248,7 @@ export function getPackageJSON() {
       return data
     }
     catch (_e) {
-      Print.getInstance().err('Failed to parse package.json.')
+      printErr('Failed to parse package.json.')
       process.exit(1)
     }
   }
@@ -249,7 +263,7 @@ export async function writePackageJSON(data: AnyKey) {
     await w('package.json', `${JSON.stringify(data, null, 2)}\n`)
   }
   catch (_error) {
-    Print.getInstance().err('Failed to write in package.json.')
+    printErr('Failed to write in package.json.')
     process.exit(1)
   }
 }

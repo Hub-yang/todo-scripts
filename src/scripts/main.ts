@@ -3,8 +3,7 @@ import mri from 'mri'
 import colors from 'picocolors'
 import spinner from 'yocto-spinner'
 import { DEFAULT_PKG_NAME, HELP_MESSAGE } from '@/constants'
-import { banner, uninstallPkg } from '@/utils'
-import { Print } from '@/utils/print'
+import { banner, printWarn, uninstallPkg } from '@/utils'
 
 interface ArgvOptions {
   clear?: boolean
@@ -13,7 +12,6 @@ interface ArgvOptions {
 }
 
 const { bold, green } = colors
-const { warn } = Print.getInstance()
 
 async function main() {
   const scriptsMap: string[] = ['commitlint-init']
@@ -46,7 +44,7 @@ async function main() {
     }
   }
   else {
-    warn('Please use a script.')
+    printWarn('Please use a script.')
     process.exit(1)
   }
 }
