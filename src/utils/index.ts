@@ -1,4 +1,3 @@
-/* eslint-disable e18e/prefer-static-regex */
 /* eslint-disable regexp/no-unused-capturing-group */
 import fs, { existsSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
