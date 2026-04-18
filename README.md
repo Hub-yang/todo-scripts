@@ -45,7 +45,7 @@ bun add --dev @huberyyang/todo-scripts
 🟢 commitlint-init
 </summary>
 
-🚀 无需安装，一键生成 [commitlint](https://github.com/conventional-changelog/commitlint) + [husky](https://github.com/typicode/husky) + [lint-staged](https://github.com/lint-staged/lint-staged) 配置
+🚀 一条命令搞定 [commitlint](https://github.com/conventional-changelog/commitlint) + [husky](https://github.com/typicode/husky) + [lint-staged](https://github.com/lint-staged/lint-staged) 配置，告别繁琐的手动配置
 
 #### ⚡️ 执行
 
