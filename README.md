@@ -10,6 +10,23 @@
 
 一些帮助简化前端配置工程的通用脚本
 
+### ✨ 为什么 (Why todo-scripts)
+
+每次新建前端项目，都要重复一遍：
+
+- 装 commitlint、husky、lint-staged
+- 手写配置文件
+- 踩一遍 husky 初始化的坑
+
+todo-scripts 把这些打包成一条命令，`commitlint-init` 执行完就全搞定，
+支持 `--czgit` 快速集成 cz-git，支持 `--clear` 用完即走不留依赖
+
+### 🎬 演示 (Demo)
+
+<div align="center">
+  <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
+</div>
+
 ### 📦 安装 (Install)
 
 ```shell
@@ -40,10 +57,7 @@ bun add --dev @huberyyang/todo-scripts
 
 - `commitlint-init`
 
-<details>
-<summary>
-🟢 commitlint-init
-</summary>
+### 🟢 commitlint-init
 
 🚀 一条命令搞定 [commitlint](https://github.com/conventional-changelog/commitlint) + [husky](https://github.com/typicode/husky) + [lint-staged](https://github.com/lint-staged/lint-staged) 配置，告别繁琐的手动配置
 
@@ -75,6 +89,96 @@ bunx hubery commitlint-init
 git add .
 git commit -m "test commitlint"
 ```
+
+#### ✨ 智能特性 (Smart Features)
+
+`commitlint-init` 内置多项自动检测能力，你无需关心环境差异，直接运行即可
+
+**📦 自动识别包管理器**
+自动识别当前使用的包管理器（npm / pnpm / yarn / bun），并调用对应的安装、执行指令，无需手动指定
+
+| 包管理器 | 安装指令示例 | 执行指令示例 |
+| -------- | ------------ | ------------ |
+| npm      | `npm install --save-dev` | `npx` |
+| pnpm     | `pnpm add -D` | `pnpm exec` |
+| yarn     | `yarn add --dev` | `yarn` |
+| bun      | `bun add --dev` | `bunx` |
+
+**🔷 自动识别 TypeScript 项目**
+自动检测是否为ts项目，生成的配置文件格式与项目保持一致，无需额外处理
+
+**🗂️ 自动识别 Monorepo 项目**
+自动检测是否为 monorepo 项目，安装依赖时自动追加对应包管理器的工作区 flag，确保依赖安装到正确位置
+
+| 包管理器 | Monorepo 安装 flag |
+| -------- | ------------------ |
+| pnpm     | `-w` |
+| yarn     | `-W` |
+| npm / bun | 无需额外 flag |
+
+**🔀 自动初始化 Git**
+若当前目录尚未执行过 `git init`（不存在 `.git` 目录），脚本会自动初始化 git 仓库，确保 husky hooks 能正常注册
+
+**🔍 自动集成 ESLint**
+若项目中已存在 ESLint 配置文件，脚本在生成 `commitlint.config.*` 后会自动对其执行 lint fix，确保生成的配置文件符合项目代码风格，直接提交即可
+
+#### 📁 执行后生成的内容
+
+脚本执行完成后，你的项目中会新增/修改以下内容：
+
+```
+your-project/
+├── .husky/
+│   ├── pre-commit        # 每次 commit 前自动运行 lint-staged
+│   └── commit-msg        # 自动校验 commit message 格式
+├── commitlint.config.ts  # commitlint 配置（JS 项目则为 .js）
+└── package.json          # 自动写入 lint-staged 配置和 commitlint 脚本
+```
+
+`package.json` 中新增的内容：
+
+```json
+{
+  "scripts": {
+    "commitlint": "commitlint --edit"
+  },
+  "lint-staged": {
+    "*": "eslint . --fix"
+  }
+}
+```
+
+启用 `--czgit` 时额外写入：
+
+```json
+{
+  "scripts": {
+    "cz": "git cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  }
+}
+```
+
+#### 🔄 配置完成后的工作流
+
+```shell
+# 正常提交 - commitlint 自动校验 message 格式，lint-staged 自动 fix 代码
+git add .
+git commit -m "feat: add new feature"
+
+# 使用 cz-git 交互式提交（需在初始化时传入 --czgit）
+git add .
+pnpm cz   # 或 npm run cz / yarn cz / bun run cz
+```
+
+> [!TIP]
+> commit message 须符合 [Conventional Commits](https://www.conventionalcommits.org/) 规范，格式为 `type: subject`，例如 `feat: 新增登录功能`、`fix: 修复按钮样式`
+
+---
 
 ### 📜 许可证 (License)
 
