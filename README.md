@@ -1,16 +1,22 @@
 <h1 align="center">🔥 todo-scripts</h1>
 
 <div align="center">
+  <b>中文</b> | <a href="./README.en.md">English</a>
+</div>
+
+<br/>
+
+<div align="center">
   <a href="https://github.com/Hub-yang/todo-scripts"><img src="https://img.shields.io/github/package-json/v/Hub-yang/todo-scripts?style=flat-square&label=%20&color=%23000" alt="github version"></a>
   <a href="https://github.com/Hub-yang/todo-scripts"><img src="https://img.shields.io/static/v1?label=%F0%9F%8C%9F&message=If%20Useful&style=flat-square&color=BC4E99" alt="star badge"/></a>
   <a href="https://opensource.org/license/MIT"><img src="https://img.shields.io/npm/l/express?style=flat-square" alt="license"/></a>
 </div>
 
-### 💡 说明 (Features)
+### 💡 说明
 
 一些帮助简化前端配置工程的通用脚本
 
-### ✨ 为什么 (Why todo-scripts)
+### ✨ 为什么选择 todo-scripts
 
 每次新建前端项目，都要重复一遍：
 
@@ -21,13 +27,13 @@
 todo-scripts 把这些打包成一条命令，`commitlint-init` 执行完就全搞定，
 支持 `--czgit` 快速集成 cz-git，支持 `--clear` 用完即走不留依赖
 
-### 🎬 演示 (Demo)
+### 🎬 演示
 
 <div align="center">
   <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
 </div>
 
-### 📦 安装 (Install)
+### 📦 安装
 
 ```shell
 # npm
@@ -53,7 +59,7 @@ npm install --save-dev @huberyyang/todo-scripts
 bun add --dev @huberyyang/todo-scripts
 ```
 
-### 🔌 当前可用指令 (Current Script)
+### 🔌 当前可用指令
 
 - `commitlint-init`
 
@@ -83,14 +89,14 @@ bunx hubery commitlint-init
 #### 🎉 测试
 
 > [!NOTE]
-> eslint 会在每次执行commit前自动执行，如需更改commit钩子执行前的命令，可自行修改**package.json**中**lint-staged**配置
+> eslint 会在每次执行 commit 前自动执行，如需更改 commit 钩子执行前的命令，可自行修改 **package.json** 中 **lint-staged** 配置
 
 ```shell
 git add .
 git commit -m "test commitlint"
 ```
 
-#### ✨ 智能特性 (Smart Features)
+#### ✨ 智能特性
 
 `commitlint-init` 内置多项自动检测能力，你无需关心环境差异，直接运行即可
 
@@ -105,7 +111,7 @@ git commit -m "test commitlint"
 | bun      | `bun add --dev` | `bunx` |
 
 **🔷 自动识别 TypeScript 项目**
-自动检测是否为ts项目，生成的配置文件格式与项目保持一致，无需额外处理
+自动检测是否为 ts 项目，生成的配置文件格式与项目保持一致，无需额外处理
 
 **🗂️ 自动识别 Monorepo 项目**
 自动检测是否为 monorepo 项目，安装依赖时自动追加对应包管理器的工作区 flag，确保依赖安装到正确位置
@@ -180,6 +186,6 @@ pnpm cz   # 或 npm run cz / yarn cz / bun run cz
 
 ---
 
-### 📜 许可证 (License)
+### 📜 许可证
 
 MIT License © 2026 [Hubery Yang](https://github.com/Hub-yang)
