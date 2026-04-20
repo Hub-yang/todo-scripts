@@ -1,0 +1,160 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#161b22"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="accentV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Subtle dot grid -->
+  <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="#30363d" opacity="0.4"/>
+  </pattern>
+  <rect width="1280" height="640" fill="url(#dots)"/>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1280" height="3" fill="url(#accent)"/>
+
+  <!-- Left vertical accent line -->
+  <rect x="80" y="110" width="3" height="380" rx="1.5" fill="url(#accentV)"/>
+
+  <!-- === LEFT COLUMN === -->
+
+  <!-- Title: emoji + name -->
+  <text x="104" y="206"
+        font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"
+        font-size="68" fill="#e6edf3">🔥</text>
+  <text x="186" y="206"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="68" font-weight="800" fill="#e6edf3" letter-spacing="-2">todo-scripts</text>
+
+  <!-- Tagline -->
+  <text x="104" y="262"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="23" fill="#8b949e">
+    One command to set up commitlint + husky + lint-staged
+  </text>
+
+  <!-- Sub-tagline -->
+  <text x="104" y="298"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="18" fill="#6e7681">
+    Auto-detects package manager · TypeScript · Monorepo
+  </text>
+
+  <!-- Tech stack chips -->
+  <rect x="104" y="334" width="152" height="34" rx="17" fill="#1f6feb1a" stroke="#1f6feb66" stroke-width="1.2"/>
+  <text x="180" y="356" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#79c0ff">commitlint</text>
+
+  <rect x="266" y="334" width="96" height="34" rx="17" fill="#2386361a" stroke="#23863666" stroke-width="1.2"/>
+  <text x="314" y="356" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#3fb950">husky</text>
+
+  <rect x="372" y="334" width="128" height="34" rx="17" fill="#8957e51a" stroke="#8957e566" stroke-width="1.2"/>
+  <text x="436" y="356" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#d2a8ff">lint-staged</text>
+
+  <rect x="510" y="334" width="86" height="34" rx="17" fill="#f973161a" stroke="#f9731666" stroke-width="1.2"/>
+  <text x="553" y="356" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#fdba74">cz-git</text>
+
+  <!-- Install command box -->
+  <rect x="104" y="396" width="538" height="50" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1.2"/>
+  <text x="124" y="427"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="16" fill="#f97316">$</text>
+  <text x="142" y="427"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="16" fill="#e6edf3"> npx hubery commitlint-init</text>
+
+  <!-- Repo info -->
+  <text x="104" y="526"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="16" fill="#484f58">github.com/Hub-yang/todo-scripts</text>
+
+  <text x="104" y="556"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#30363d">MIT License · npm: @huberyyang/todo-scripts</text>
+
+  <!-- === RIGHT COLUMN: Terminal window === -->
+  <rect x="728" y="98" width="472" height="430" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+
+  <!-- Terminal header bar -->
+  <rect x="728" y="98" width="472" height="46" rx="12" fill="#21262d"/>
+  <rect x="728" y="122" width="472" height="22" fill="#21262d"/>
+
+  <!-- Traffic light dots -->
+  <circle cx="760" cy="121" r="7" fill="#ff5f57"/>
+  <circle cx="786" cy="121" r="7" fill="#febc2e"/>
+  <circle cx="812" cy="121" r="7" fill="#28c840"/>
+
+  <!-- Terminal title -->
+  <text x="964" y="126" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="12" fill="#6e7681">zsh</text>
+
+  <!-- Terminal lines -->
+  <text x="752" y="180"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="15.5" fill="#8b949e">$ npx hubery commitlint-init</text>
+
+  <text x="752" y="212"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ Detected: pnpm · TypeScript · Monorepo</text>
+
+  <text x="752" y="242"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ commitlint.config.ts created</text>
+
+  <text x="752" y="272"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ .husky/pre-commit installed</text>
+
+  <text x="752" y="302"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ .husky/commit-msg installed</text>
+
+  <text x="752" y="332"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ lint-staged configured</text>
+
+  <text x="752" y="362"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="14.5" fill="#7ee787">✓ package.json updated</text>
+
+  <!-- Divider -->
+  <line x1="752" y1="384" x2="1180" y2="384" stroke="#21262d" stroke-width="1"/>
+
+  <text x="752" y="410"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="15" fill="#3fb950">🎉 All done in 2.3s! Happy committing.</text>
+
+  <text x="752" y="444"
+        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
+        font-size="15.5" fill="#8b949e">$ <tspan fill="#79c0ff">▌</tspan></text>
+
+  <!-- Bottom right version tag -->
+  <text x="1192" y="570" text-anchor="end"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="14" fill="#30363d">v1.0.12</text>
+</svg>
