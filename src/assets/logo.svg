@@ -1,96 +1,147 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
 
-    <!-- Vite-style: one filter per blur radius -->
-    <filter id="f0" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="46"/>
+    <!-- ── Glow filters (Vite technique: blur per layer) ── -->
+    <filter id="f0" x="-100%" y="-80%" width="300%" height="260%">
+      <feGaussianBlur stdDeviation="48"/>
     </filter>
-    <filter id="f1" x="-60%" y="-60%" width="220%" height="220%">
+    <filter id="f1" x="-70%" y="-60%" width="240%" height="220%">
       <feGaussianBlur stdDeviation="34"/>
     </filter>
     <filter id="f2" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="24"/>
+      <feGaussianBlur stdDeviation="22"/>
     </filter>
     <filter id="f3" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="14"/>
+      <feGaussianBlur stdDeviation="13"/>
     </filter>
     <filter id="f4" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="8"/>
+      <feGaussianBlur stdDeviation="7"/>
     </filter>
-    <filter id="ambient" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="28"/>
+    <filter id="halo" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="30"/>
     </filter>
-
-    <!-- Background -->
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1c2333"/>
-      <stop offset="100%" stop-color="#0d1117"/>
-    </linearGradient>
+    <filter id="bgBloom" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="72"/>
+    </filter>
+    <filter id="bgEdge" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <filter id="spark" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
 
     <!--
-      Angular flame polygon (9 vertices, Vite-style geometric silhouette):
-        tip → upper-right shoulder → right-widest → lower-right → base-right
-        → base-left → lower-left → left-widest → upper-left shoulder
+      Lightning bolt: 8-point polygon leaning left (upper-right → lower-left).
+      Top bar  y=52  → x 192..342  (150 px wide)
+      Left jut y=250 → x 148..226  (notch step right)
+      Right jut y=262 → x 278..356  (notch step left)
+      Bot bar  y=460 → x 174..314  (140 px wide)
     -->
-    <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+    <mask id="bolt" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
       <polygon
-        points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
+        points="342,52 192,52 148,250 226,250 174,460 314,460 356,262 278,262"
         fill="white"/>
     </mask>
 
   </defs>
 
-  <!-- Dark rounded-square background -->
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- ════════════════════════════════════════════
+       BACKGROUND
+       Three layers: base gradient + warm central bloom + cool edge haze
+  ════════════════════════════════════════════ -->
 
-  <!-- Vite-family left/right white panels (signature framing) -->
-  <rect x="56" y="72" width="20" height="368" rx="10" fill="white" opacity="0.88"/>
-  <rect x="436" y="72" width="20" height="368" rx="10" fill="white" opacity="0.88"/>
+  <!-- 1. Base: near-black with cool-blue tint top-left -->
+  <rect width="512" height="512" rx="96" fill="#080d16"/>
+  <!-- Gradient overlay: dark indigo top-left → dark charcoal bottom-right -->
+  <rect width="512" height="512" rx="96"
+        fill="url(#bgOverlay)" opacity="1"/>
+  <defs>
+    <linearGradient id="bgOverlay" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#111827"/>
+      <stop offset="55%"  stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#060a10"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Ambient halo: blurred copy of flame behind the sharp shape -->
+  <!-- 2. Warm bloom at center – the bolt "lights up" the background -->
+  <ellipse cx="258" cy="256" rx="180" ry="200"
+           fill="#f97316" opacity="0.07" filter="url(#bgBloom)"/>
+
+  <!-- 3. Cool-blue edge vignette (top-right and bottom-left corners) -->
+  <ellipse cx="440" cy="72"  rx="140" ry="100"
+           fill="#3b82f6" opacity="0.06" filter="url(#bgEdge)"/>
+  <ellipse cx="72"  cy="440" rx="140" ry="100"
+           fill="#6366f1" opacity="0.05" filter="url(#bgEdge)"/>
+
+  <!-- 4. Fine spark dots around the bolt (electrical atmosphere) -->
+  <g opacity="0.35" filter="url(#spark)">
+    <circle cx="368" cy="96"  r="2.5" fill="#fde68a"/>
+    <circle cx="396" cy="148" r="1.8" fill="#fbbf24"/>
+    <circle cx="134" cy="176" r="2"   fill="#fed7aa"/>
+    <circle cx="152" cy="362" r="1.5" fill="#fde68a"/>
+    <circle cx="376" cy="380" r="2"   fill="#fbbf24"/>
+    <circle cx="120" cy="300" r="1.5" fill="#fdba74"/>
+    <circle cx="400" cy="296" r="2.2" fill="#fef3c7"/>
+    <circle cx="164" cy="100" r="1.8" fill="#fde68a"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════
+       SIDE PANELS  (Vite-family signature)
+  ════════════════════════════════════════════ -->
+  <rect x="58"  y="74" width="18" height="364" rx="9" fill="white" opacity="0.86"/>
+  <rect x="436" y="74" width="18" height="364" rx="9" fill="white" opacity="0.86"/>
+
+  <!-- ════════════════════════════════════════════
+       LIGHTNING BOLT
+  ════════════════════════════════════════════ -->
+
+  <!-- Outer ambient halo (behind bolt, outside mask) -->
   <polygon
-    points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
-    fill="#f97316" opacity="0.20" filter="url(#ambient)"/>
+    points="342,52 192,52 148,250 226,250 174,460 314,460 356,262 278,262"
+    fill="#f97316" opacity="0.18" filter="url(#halo)"/>
 
-  <!-- ── Masked glow stack (core Vite technique) ───────────────────────────
-       All children are clipped to the flame polygon.
-       No linearGradient — colour transitions emerge from layered blurred ellipses.
-  ───────────────────────────────────────────────────────────────────────── -->
-  <g mask="url(#m)">
+  <!-- Masked glow stack – no linearGradient, pure layered blur (Vite technique) -->
+  <g mask="url(#bolt)">
 
-    <!-- Base: fill the entire masked area with darkest ember colour -->
+    <!-- Base fill: darkest ember, covers entire bolt interior -->
     <rect width="512" height="512" fill="#3b0900"/>
 
-    <!-- L1 – deep ember base (large, bottom-heavy) -->
-    <ellipse cx="256" cy="400" rx="150" ry="72" fill="#7c2d12" filter="url(#f0)"/>
+    <!-- L1 – deep base ember, bottom-heavy -->
+    <ellipse cx="246" cy="400" rx="130" ry="68"
+             fill="#7c2d12" filter="url(#f0)"/>
 
-    <!-- L2 – orange body (tall, centred low) -->
-    <ellipse cx="256" cy="318" rx="108" ry="158" fill="#c2410c" filter="url(#f1)"/>
+    <!-- L2 – orange body, centred lower -->
+    <ellipse cx="250" cy="308" rx="100" ry="152"
+             fill="#c2410c" filter="url(#f1)"/>
 
-    <!-- L3 – bright orange, Vite-signature 38° diagonal -->
-    <ellipse cx="256" cy="258" rx="80" ry="128"
+    <!-- L3 – bright orange, +38° diagonal (Vite signature cross-light) -->
+    <ellipse cx="252" cy="256" rx="82" ry="130"
              fill="#f97316" filter="url(#f2)"
-             transform="rotate(38 256 258)"/>
+             transform="rotate(38 252 256)"/>
 
-    <!-- L4 – amber, opposite 38° diagonal (creates cross-light depth) -->
-    <ellipse cx="256" cy="206" rx="62" ry="102"
+    <!-- L4 – amber, –38° diagonal (opposite cross-light for depth) -->
+    <ellipse cx="256" cy="205" rx="64" ry="105"
              fill="#f59e0b" filter="url(#f2)"
-             transform="rotate(-38 256 206)"/>
+             transform="rotate(-38 256 205)"/>
 
-    <!-- L5 – golden-yellow upper body -->
-    <ellipse cx="256" cy="155" rx="44" ry="76" fill="#fbbf24" filter="url(#f3)"/>
+    <!-- L5 – golden yellow, upper body -->
+    <ellipse cx="260" cy="152" rx="46" ry="78"
+             fill="#fbbf24" filter="url(#f3)"/>
 
-    <!-- L6 – pale yellow rising to tip -->
-    <ellipse cx="256" cy="112" rx="28" ry="52" fill="#fde68a" filter="url(#f3)"/>
+    <!-- L6 – pale yellow, near tip -->
+    <ellipse cx="264" cy="106" rx="28" ry="52"
+             fill="#fde68a" filter="url(#f3)"/>
 
-    <!-- L7 – near-white hot point at very tip -->
-    <ellipse cx="256" cy="80" rx="16" ry="32" fill="#fef9c3" filter="url(#f4)"/>
+    <!-- L7 – white-hot at very tip -->
+    <ellipse cx="268" cy="70"  rx="16" ry="30"
+             fill="#fef9c3" filter="url(#f4)"/>
 
   </g>
 
-  <!-- Sharp polygon edge: thin white rim echoes Vite's clean geometry -->
+  <!-- Bolt edge: very faint warm rim, Vite-style clean geometry -->
   <polygon
-    points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
-    fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
+    points="342,52 192,52 148,250 226,250 174,460 314,460 356,262 278,262"
+    fill="none" stroke="rgba(253,186,116,0.14)" stroke-width="1.5"
+    stroke-linejoin="miter"/>
 
 </svg>
