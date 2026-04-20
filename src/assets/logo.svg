@@ -1,123 +1,96 @@
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
+
+    <!-- Vite-style: one filter per blur radius -->
+    <filter id="f0" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="46"/>
+    </filter>
+    <filter id="f1" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+    <filter id="f2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="f3" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="f4" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="ambient" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+
     <!-- Background -->
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#1c2333"/>
       <stop offset="100%" stop-color="#0d1117"/>
     </linearGradient>
 
-    <!-- Outer flame: dark red → orange → pale yellow -->
-    <linearGradient id="g1" x1="256" y1="444" x2="256" y2="68" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#7f1d1d"/>
-      <stop offset="20%"  stop-color="#dc2626"/>
-      <stop offset="50%"  stop-color="#f97316"/>
-      <stop offset="80%"  stop-color="#fbbf24"/>
-      <stop offset="100%" stop-color="#fef9c3"/>
-    </linearGradient>
+    <!--
+      Angular flame polygon (9 vertices, Vite-style geometric silhouette):
+        tip → upper-right shoulder → right-widest → lower-right → base-right
+        → base-left → lower-left → left-widest → upper-left shoulder
+    -->
+    <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <polygon
+        points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
+        fill="white"/>
+    </mask>
 
-    <!-- Middle flame: orange → yellow-white -->
-    <linearGradient id="g2" x1="256" y1="408" x2="256" y2="100" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#ea580c"/>
-      <stop offset="50%"  stop-color="#fbbf24"/>
-      <stop offset="100%" stop-color="#fefce8"/>
-    </linearGradient>
-
-    <!-- Inner core: yellow → white -->
-    <linearGradient id="g3" x1="256" y1="370" x2="256" y2="168" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#fde68a"/>
-      <stop offset="55%"  stop-color="#fef9c3"/>
-      <stop offset="100%" stop-color="#ffffff"/>
-    </linearGradient>
-
-    <!-- Ambient glow filter -->
-    <filter id="ambientGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="28" result="blur"/>
-      <feColorMatrix in="blur" type="matrix"
-        values="1.2 0.4 0 0 0.05  0.4 0.2 0 0 0  0 0 0 0 0  0 0 0 0.6 0"
-        result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <!-- Sharp glow behind flame -->
-    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="16" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
 
-  <!-- Background rounded square -->
-  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+  <!-- Dark rounded-square background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
 
-  <!-- Ambient orange glow (behind flame) -->
-  <ellipse cx="256" cy="340" rx="148" ry="100"
-           fill="#f97316" opacity="0.18" filter="url(#ambientGlow)"/>
+  <!-- Vite-family left/right white panels (signature framing) -->
+  <rect x="56" y="72" width="20" height="368" rx="10" fill="white" opacity="0.88"/>
+  <rect x="436" y="72" width="20" height="368" rx="10" fill="white" opacity="0.88"/>
 
-  <!-- Flame glow halo (blurred copy of outer flame) -->
-  <path d="M 256 444
-           C 180 444 118 390 116 312
-           C 114 254 152 218 164 198
-           C 144 212 136 176 166 154
-           C 190 164 208 202 220 184
-           C 234 152 246 108 256 68
-           C 266 108 278 152 292 184
-           C 304 202 322 164 346 154
-           C 376 176 368 212 348 198
-           C 360 218 398 254 396 312
-           C 394 390 332 444 256 444Z"
-        fill="#f97316" opacity="0.25" filter="url(#softGlow)"/>
+  <!-- Ambient halo: blurred copy of flame behind the sharp shape -->
+  <polygon
+    points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
+    fill="#f97316" opacity="0.20" filter="url(#ambient)"/>
 
-  <!-- Outer flame (sharp) -->
-  <path d="M 256 444
-           C 180 444 118 390 116 312
-           C 114 254 152 218 164 198
-           C 144 212 136 176 166 154
-           C 190 164 208 202 220 184
-           C 234 152 246 108 256 68
-           C 266 108 278 152 292 184
-           C 304 202 322 164 346 154
-           C 376 176 368 212 348 198
-           C 360 218 398 254 396 312
-           C 394 390 332 444 256 444Z"
-        fill="url(#g1)"/>
+  <!-- ── Masked glow stack (core Vite technique) ───────────────────────────
+       All children are clipped to the flame polygon.
+       No linearGradient — colour transitions emerge from layered blurred ellipses.
+  ───────────────────────────────────────────────────────────────────────── -->
+  <g mask="url(#m)">
 
-  <!-- Middle flame -->
-  <path d="M 256 408
-           C 206 408 160 372 158 306
-           C 156 258 186 228 196 210
-           C 180 222 172 190 196 170
-           C 214 178 226 208 236 192
-           C 246 164 252 130 256 100
-           C 260 130 266 164 276 192
-           C 286 208 298 178 316 170
-           C 340 190 332 222 316 210
-           C 326 228 356 258 354 306
-           C 352 372 306 408 256 408Z"
-        fill="url(#g2)"/>
+    <!-- Base: fill the entire masked area with darkest ember colour -->
+    <rect width="512" height="512" fill="#3b0900"/>
 
-  <!-- Inner core -->
-  <path d="M 256 370
-           C 228 370 206 352 204 318
-           C 202 290 216 272 226 258
-           C 214 266 208 246 220 234
-           C 230 238 236 254 242 242
-           C 248 222 252 196 256 168
-           C 260 196 264 222 270 242
-           C 276 254 282 238 292 234
-           C 304 246 298 266 286 258
-           C 296 272 310 290 308 318
-           C 306 352 284 370 256 370Z"
-        fill="url(#g3)" opacity="0.92"/>
+    <!-- L1 – deep ember base (large, bottom-heavy) -->
+    <ellipse cx="256" cy="400" rx="150" ry="72" fill="#7c2d12" filter="url(#f0)"/>
 
-  <!-- Subtle "> _" terminal hint at flame base -->
-  <text x="256" y="436"
-        text-anchor="middle"
-        font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace"
-        font-size="36" font-weight="700"
-        fill="#fbbf24" opacity="0.55">&gt;_</text>
+    <!-- L2 – orange body (tall, centred low) -->
+    <ellipse cx="256" cy="318" rx="108" ry="158" fill="#c2410c" filter="url(#f1)"/>
+
+    <!-- L3 – bright orange, Vite-signature 38° diagonal -->
+    <ellipse cx="256" cy="258" rx="80" ry="128"
+             fill="#f97316" filter="url(#f2)"
+             transform="rotate(38 256 258)"/>
+
+    <!-- L4 – amber, opposite 38° diagonal (creates cross-light depth) -->
+    <ellipse cx="256" cy="206" rx="62" ry="102"
+             fill="#f59e0b" filter="url(#f2)"
+             transform="rotate(-38 256 206)"/>
+
+    <!-- L5 – golden-yellow upper body -->
+    <ellipse cx="256" cy="155" rx="44" ry="76" fill="#fbbf24" filter="url(#f3)"/>
+
+    <!-- L6 – pale yellow rising to tip -->
+    <ellipse cx="256" cy="112" rx="28" ry="52" fill="#fde68a" filter="url(#f3)"/>
+
+    <!-- L7 – near-white hot point at very tip -->
+    <ellipse cx="256" cy="80" rx="16" ry="32" fill="#fef9c3" filter="url(#f4)"/>
+
+  </g>
+
+  <!-- Sharp polygon edge: thin white rim echoes Vite's clean geometry -->
+  <polygon
+    points="256,46 334,170 372,272 338,372 298,446 214,446 174,372 140,272 178,170"
+    fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
+
 </svg>
