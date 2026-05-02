@@ -1,4 +1,6 @@
-<h1 align="center">🔥 todo-scripts</h1>
+<h1 align="center">
+  <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/logo.png" alt="todo scripts logo" width="100" />
+ todo-scripts</h1>
 
 <div align="center">
   <b>中文</b> | <a href="./README.en.md">English</a>
@@ -46,7 +48,7 @@ yarn add --dev @huberyyang/todo-scripts
 bun add --dev @huberyyang/todo-scripts
 ```
 
-如果你的项目是 **monorepo**，请使用以下命令安装到工作区根目录：
+如果你的项目是 **monorepo**，使用以下命令安装到工作区根目录：
 
 ```shell
 # pnpm
@@ -98,7 +100,7 @@ git commit -m "test commitlint"
 
 #### ✨ 智能特性
 
-`commitlint-init` 内置多项自动检测能力，你无需关心环境差异，直接运行即可
+`commitlint-init` 内置多项自动检测能力，无需关心环境差异，直接运行即可
 
 **📦 自动识别包管理器**
 自动识别当前使用的包管理器（npm / pnpm / yarn / bun），并调用对应的安装、执行指令，无需手动指定
