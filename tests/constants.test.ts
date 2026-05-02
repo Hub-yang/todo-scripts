@@ -9,9 +9,7 @@ import {
   WRITE_COMMIT_PRE,
 } from '@/constants'
 
-// ========================================
 // DEFAULT_PKG_NAME / REPO_URL - 基础常量
-// ========================================
 describe('基础常量', () => {
   it('default_PKG_NAME 应该是正确的包名', () => {
     expect(DEFAULT_PKG_NAME).toBe('@huberyyang/todo-scripts')
@@ -23,9 +21,7 @@ describe('基础常量', () => {
   })
 })
 
-// ========================================
 // HELP_MESSAGE - 帮助信息
-// ========================================
 describe('help_MESSAGE', () => {
   it('应该包含可用指令 commitlint-init', () => {
     expect(HELP_MESSAGE).toContain('commitlint-init')
@@ -39,9 +35,7 @@ describe('help_MESSAGE', () => {
   })
 })
 
-// ========================================
 // CONFIG_COMMITLINT - 标准 commitlint 配置模板
-// ========================================
 describe('config_COMMITLINT', () => {
   it('应该是有效的 JavaScript 导出语句', () => {
     // 配置模板应该以 export default 开头
@@ -61,9 +55,7 @@ describe('config_COMMITLINT', () => {
   })
 })
 
-// ========================================
 // CONFIG_COMMITLINT_CZGIT - cz-git 增强配置模板
-// ========================================
 describe('config_COMMITLINT_CZGIT', () => {
   it('应该包含 cz-git 的类型声明注释', () => {
     expect(CONFIG_COMMITLINT_CZGIT).toContain('cz-git')
@@ -93,9 +85,7 @@ describe('config_COMMITLINT_CZGIT', () => {
   })
 })
 
-// ========================================
 // WRITE_COMMIT_PRE / WRITE_COMMIT_MSG - husky 钩子模板
-// ========================================
 describe('husky 钩子模板', () => {
   it('write_COMMIT_PRE 应该包含 lint-staged 命令', () => {
     // pre-commit 钩子应该运行 lint-staged
