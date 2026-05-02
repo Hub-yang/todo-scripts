@@ -1,6 +1,4 @@
-<h1 align="center">
-  <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/logo.png" alt="todo scripts logo" width="100" />
- todo-scripts</h1>
+<h1 align="center">🔥 todo-scripts</h1>
 
 <div align="center">
   <b>中文</b> | <a href="./README.en.md">English</a>
