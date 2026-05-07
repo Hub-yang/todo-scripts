@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "lib": ["ESNext"],
     "module": "Preserve",
     "moduleResolution": "bundler",
     "paths": {
@@ -22,8 +23,6 @@
     "tests"
   ],
   "exclude": [
-    "bin",
-    "dist",
-    "node_modules"
+    "bin"
   ]
 }
