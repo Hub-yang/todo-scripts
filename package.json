@@ -2,7 +2,7 @@
   "name": "@huberyyang/todo-scripts",
   "type": "module",
   "version": "1.0.12",
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.0.7",
   "description": "Some public executable scripts",
   "author": "HuberyYang",
   "license": "MIT",
