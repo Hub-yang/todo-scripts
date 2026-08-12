@@ -3,10 +3,10 @@ import {
   CONFIG_COMMITLINT,
   CONFIG_COMMITLINT_CZGIT,
   DEFAULT_PKG_NAME,
+  getCommitMsgHook,
+  getCommitPreHook,
   HELP_MESSAGE,
   REPO_URL,
-  WRITE_COMMIT_MSG,
-  WRITE_COMMIT_PRE,
 } from '@/constants'
 
 // DEFAULT_PKG_NAME / REPO_URL - 基础常量
@@ -85,20 +85,20 @@ describe('config_COMMITLINT_CZGIT', () => {
   })
 })
 
-// WRITE_COMMIT_PRE / WRITE_COMMIT_MSG - husky 钩子模板
+// getCommitPreHook / getCommitMsgHook - husky 钩子模板
 describe('husky 钩子模板', () => {
-  it('write_COMMIT_PRE 应该包含 lint-staged 命令', () => {
+  it('getCommitPreHook 应该包含 lint-staged 命令', () => {
     // pre-commit 钩子应该运行 lint-staged
-    expect(WRITE_COMMIT_PRE).toContain('lint-staged')
+    expect(getCommitPreHook()).toContain('lint-staged')
   })
 
-  it('write_COMMIT_MSG 应该包含 commitlint 命令', () => {
+  it('getCommitMsgHook 应该包含 commitlint 命令', () => {
     // commit-msg 钩子应该运行 commitlint
-    expect(WRITE_COMMIT_MSG).toContain('commitlint')
+    expect(getCommitMsgHook()).toContain('commitlint')
   })
 
-  it('write_COMMIT_MSG 应该包含 --edit 参数', () => {
+  it('getCommitMsgHook 应该包含 --edit 参数', () => {
     // commitlint 需要 --edit 参数来读取提交信息
-    expect(WRITE_COMMIT_MSG).toContain('--edit')
+    expect(getCommitMsgHook()).toContain('--edit')
   })
 })

@@ -7,10 +7,23 @@ import { fileURLToPath } from 'node:url'
 import { execaCommand } from 'execa'
 import colors from 'picocolors'
 import terminalLink from 'terminal-link'
+import { parse as parseYaml } from 'yaml'
 import yoctoSpinner from 'yocto-spinner'
 import { DEFAULT_PKG_NAME, REPO_URL } from '@/constants'
 
-export interface AnyKey {
+export interface ArgvOptions {
+  clear?: boolean
+  czgit?: boolean
+  help?: boolean
+}
+
+export interface PackageJsonLike {
+  'scripts'?: Record<string, string>
+  'lint-staged'?: Record<string, string>
+  'config'?: {
+    commitizen?: { path: string }
+    [key: string]: any
+  }
   [key: string]: any
 }
 
@@ -112,7 +125,7 @@ function getPkgInfo() {
     const data = JSON.parse(raw)
     return data
   }
-  catch (_e) {
+  catch {
     return {}
   }
 }
@@ -129,7 +142,7 @@ export async function uninstallPkg(pkg: string) {
     await execaCommand(command)
     s.success(`succeed to uninstall ${pkg}!`)
   }
-  catch (_e) {
+  catch {
     s.stop()
     printErr(`Failed to uninstall ${pkg}.`)
     process.exit(1)
@@ -147,7 +160,7 @@ export async function importPkg(pkg: string) {
       module: module?.default || module?.[pkg],
     }
   }
-  catch (_e) {
+  catch {
     printErr(`Failed to import ${pkg}.`)
     process.exit(1)
   }
@@ -161,7 +174,7 @@ export async function execCommand(command: string) {
   try {
     await execaCommand(command)
   }
-  catch (_error) {
+  catch {
     printErr(`Failed to execute '${command}'.`)
     process.exit(1)
   }
@@ -193,7 +206,7 @@ export async function checkPackage(options: CheckOptions): Promise<ModuleDesc | 
       return false
     const installCommand = getInstallCommand()
     const command = `${installCommand} ${p} ${t}`
-    await execaCommand(command)
+    await execCommand(command)
     if (needImport) {
       const data = await importPkg(p)
       return data
@@ -213,14 +226,26 @@ export function isRootFileExist(file: string): boolean {
 
 /**
  * check whether the project is a monorepo
- * by detecting pnpm-workspace.yaml or workspaces field in package.json
+ * by detecting a non-empty `packages` field in pnpm-workspace.yaml
+ * or a non-empty `workspaces` field in package.json
  * @returns {boolean} - result
  */
 export function isMonorepo(): boolean {
-  if (isRootFileExist('pnpm-workspace.yaml'))
-    return true
   const pkg = getPackageJSON()
-  return !!(pkg?.workspaces)
+  if (Array.isArray(pkg?.workspaces) && pkg.workspaces.length > 0)
+    return true
+
+  if (!isRootFileExist('pnpm-workspace.yaml'))
+    return false
+
+  try {
+    const raw = fs.readFileSync(resolve(process.cwd(), 'pnpm-workspace.yaml'), 'utf-8')
+    const data = parseYaml(raw) as { packages?: string[] } | undefined
+    return Array.isArray(data?.packages) && data.packages.length > 0
+  }
+  catch {
+    return false
+  }
 }
 
 /**
@@ -237,7 +262,7 @@ export function isTsProject(): boolean {
 /**
  * get the package.json in object format
  */
-export function getPackageJSON() {
+export function getPackageJSON(): PackageJsonLike | undefined {
   const cwd = process.cwd()
   const path = resolve(cwd, 'package.json')
   if (isRootFileExist('package.json')) {
@@ -246,7 +271,7 @@ export function getPackageJSON() {
       const data = JSON.parse(raw)
       return data
     }
-    catch (_e) {
+    catch {
       printErr('Failed to parse package.json.')
       process.exit(1)
     }
@@ -255,13 +280,13 @@ export function getPackageJSON() {
 
 /**
  * write package.json
- * @param {any} data - content
+ * @param {PackageJsonLike} data - content
  */
-export async function writePackageJSON(data: AnyKey) {
+export async function writePackageJSON(data: PackageJsonLike) {
   try {
     await w('package.json', `${JSON.stringify(data, null, 2)}\n`)
   }
-  catch (_error) {
+  catch {
     printErr('Failed to write in package.json.')
     process.exit(1)
   }

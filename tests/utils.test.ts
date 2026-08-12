@@ -96,8 +96,13 @@ describe('getInstallCommand', () => {
 
   it('pnpm monorepo 环境下应该返回 "pnpm add -w"', () => {
     process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    // 模拟 pnpm-workspace.yaml 文件存在
+    // 模拟 pnpm-workspace.yaml 文件存在，且声明了非空 packages 字段
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (String(p).includes('pnpm-workspace.yaml'))
+        return 'packages:\n  - packages/*\n'
+      return JSON.stringify({ name: 'test' })
+    })
     expect(getInstallCommand()).toBe('pnpm add -w')
   })
 
@@ -148,7 +153,13 @@ describe('getUninstallCommand', () => {
 
   it('pnpm monorepo 环境下应该返回 "pnpm remove -w"', () => {
     process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
+    // 模拟 pnpm-workspace.yaml 文件存在，且声明了非空 packages 字段
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (String(p).includes('pnpm-workspace.yaml'))
+        return 'packages:\n  - packages/*\n'
+      return JSON.stringify({ name: 'test' })
+    })
     expect(getUninstallCommand()).toBe('pnpm remove -w')
   })
 
@@ -303,10 +314,25 @@ describe('isMonorepo', () => {
     vi.restoreAllMocks()
   })
 
-  it('存在 pnpm-workspace.yaml 时应该返回 true', () => {
-    // 模拟 pnpm-workspace.yaml 文件存在
+  it('pnpm-workspace.yaml 中声明了非空 packages 时应该返回 true', () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (String(p).includes('pnpm-workspace.yaml'))
+        return 'packages:\n  - packages/*\n'
+      return JSON.stringify({ name: 'my-project' })
+    })
     expect(isMonorepo()).toBe(true)
+  })
+
+  it('pnpm-workspace.yaml 存在但没有声明 packages 字段时应该返回 false', () => {
+    // 复现本仓库自身的场景：pnpm-workspace.yaml 只放配置，没有 packages 字段
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (String(p).includes('pnpm-workspace.yaml'))
+        return 'shellEmulator: true\n'
+      return JSON.stringify({ name: 'my-project' })
+    })
+    expect(isMonorepo()).toBe(false)
   })
 
   it('package.json 中有 workspaces 字段时应该返回 true', () => {
@@ -342,13 +368,13 @@ describe('getPackageJSON', () => {
     // 当前项目根目录有 package.json，直接读取真实文件
     const pkg = getPackageJSON()
     expect(pkg).toBeDefined()
-    expect(pkg.name).toBe('@huberyyang/todo-scripts')
+    expect(pkg!.name).toBe('@huberyyang/todo-scripts')
   })
 
   it('返回的对象应该包含 version 字段', () => {
     const pkg = getPackageJSON()
     // version 应该是一个语义化版本格式的字符串
-    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+/)
+    expect(pkg!.version).toMatch(/^\d+\.\d+\.\d+/)
   })
 
   it('当 package.json 不存在时应该返回 undefined', () => {

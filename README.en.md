@@ -30,7 +30,7 @@ Supports `--czgit` for quick cz-git integration and `--clear` to uninstall depen
 ### 🎬 Demo
 
 <div align="center">
-  <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
+  <img src="https://raw.githubusercontent.com/Hub-yang/todo-scripts/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
 </div>
 
 ### 📦 Install

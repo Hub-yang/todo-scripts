@@ -3,18 +3,20 @@ import { getExecCommand } from '@/utils'
 
 export const HELP_MESSAGE = `\
 一些帮助简化前端配置工程的通用脚本
+Utility scripts to simplify frontend project configuration
 
-可用指令:
+可用指令 / Available commands:
 ${green('commitlint-init')}
 
-用法: hubery commitlint-init [参数]...
+用法 / Usage: hubery commitlint-init [参数/options]...
 
 一键生成 commitlint + husky + lint-staged 配置
+Scaffold commitlint + husky + lint-staged config in one command
 
-参数:
-  -h, --help                         查看帮助
-  --clear                            清洁执行 - 执行完脚本后卸载模块
-  --czgit                            配置 cz-git\n`
+参数 / Options:
+  -h, --help                         查看帮助 / show help
+  --clear                            清洁执行 - 执行完脚本后卸载模块 / uninstall the module after running
+  --czgit                            配置 cz-git / enable cz-git\n`
 
 export const CONFIG_COMMITLINT
   = `export default {
@@ -60,16 +62,16 @@ export default {
   prompt: {
     alias: { fd: 'docs: fix typos' },
     messages: {
-      type: '选择你要提交的类型 :',
-      scope: '选择一个提交范围（可选）:',
-      customScope: '请输入自定义的提交范围 :',
-      subject: '填写简短精炼的变更描述 :\\n',
-      body: '填写更加详细的变更描述（可选）。使用 "|" 换行 :\\n',
-      breaking: '列举非兼容性重大的变更（可选）。使用 "|" 换行 :\\n',
-      footerPrefixesSelect: '选择关联issue前缀（可选）:',
-      customFooterPrefix: '输入自定义issue前缀 :',
-      footer: '列举关联issue (可选) 例如: #31, #I3244 :\\n',
-      confirmCommit: '是否提交或修改commit ?',
+      type: '选择你要提交的类型 / Select the type of change:',
+      scope: '选择一个提交范围（可选）/ Select a scope (optional):',
+      customScope: '请输入自定义的提交范围 / Enter a custom scope:',
+      subject: '填写简短精炼的变更描述 / Write a short description:\\n',
+      body: '填写更加详细的变更描述（可选）。使用 "|" 换行 / Provide a longer description (optional). Use "|" for line breaks:\\n',
+      breaking: '列举非兼容性重大的变更（可选）。使用 "|" 换行 / List breaking changes (optional). Use "|" for line breaks:\\n',
+      footerPrefixesSelect: '选择关联issue前缀（可选）/ Select the issue prefix (optional):',
+      customFooterPrefix: '输入自定义issue前缀 / Enter a custom issue prefix:',
+      footer: '列举关联issue (可选) 例如: #31, #I3244 / List related issues (optional), e.g. #31, #I3244:\\n',
+      confirmCommit: '是否提交或修改commit / Confirm the commit?',
     },
     types: [
       { value: 'feat', name: 'feat:     新增功能 | A new feature' },
@@ -121,7 +123,13 @@ export default {
 }
 `
 
-export const WRITE_COMMIT_PRE = `${getExecCommand()}lint-staged`
-export const WRITE_COMMIT_MSG = `${getExecCommand()}commitlint --edit "$1"`
+export function getCommitPreHook(): string {
+  return `${getExecCommand()}lint-staged`
+}
+
+export function getCommitMsgHook(): string {
+  return `${getExecCommand()}commitlint --edit "$1"`
+}
+
 export const DEFAULT_PKG_NAME = '@huberyyang/todo-scripts'
 export const REPO_URL = 'https://github.com/Hub-yang/todo-scripts'

@@ -1,3 +1,4 @@
+import type { ArgvOptions } from '@/utils'
 import process from 'node:process'
 import mri from 'mri'
 import colors from 'picocolors'
@@ -5,15 +6,10 @@ import spinner from 'yocto-spinner'
 import { DEFAULT_PKG_NAME, HELP_MESSAGE } from '@/constants'
 import { banner, printWarn, uninstallPkg } from '@/utils'
 
-interface ArgvOptions {
-  clear?: boolean
-  czgit?: boolean
-  help?: boolean
-}
-
 const { bold, green } = colors
 
-async function main() {
+export async function main() {
+  banner()
   const scriptsMap: string[] = ['commitlint-init']
   const script = process.argv[2]
   const options = mri<ArgvOptions>(process.argv.slice(3), {
@@ -48,6 +44,3 @@ async function main() {
     process.exit(1)
   }
 }
-
-banner()
-main()

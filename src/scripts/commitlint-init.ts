@@ -1,13 +1,13 @@
-import type { AnyKey } from '@/utils'
+import type { ArgvOptions } from '@/utils'
 import { existsSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
-import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, WRITE_COMMIT_MSG, WRITE_COMMIT_PRE } from '@/constants'
-import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isTsProject, writePackageJSON } from '@/utils'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, getCommitMsgHook, getCommitPreHook } from '@/constants'
+import { checkPackage, execCommand, getExecCommand, getPackageJSON, getRunCommand, isTsProject, printWarn, writePackageJSON } from '@/utils'
 
-export async function init(options: AnyKey) {
+export async function init(options: ArgvOptions) {
   const useCZGit = options.czgit
   const spinner = yoctoSpinner()
 
@@ -33,21 +33,36 @@ export async function init(options: AnyKey) {
   spinner.start('commitlint config running...')
   const name = isTsProject() ? 'commitlint.config.ts' : 'commitlint.config.js'
   const content = useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT
-  await w(name, content)
-  spinner.success('commitlint config succeed!')
+  if (existsSync(resolve(cwd, name))) {
+    spinner.stop()
+    printWarn(`${name} already exists, skipped.`)
+  }
+  else {
+    await w(name, content)
+    spinner.success('commitlint config succeed!')
+  }
 
   // config husky
   spinner.start('husky config running...')
-  const command = getExecCommand()
-  await execCommand(`${command}husky init`)
-  await w('.husky/pre-commit', WRITE_COMMIT_PRE)
-  await w('.husky/commit-msg', WRITE_COMMIT_MSG)
+  await execCommand(`${getExecCommand()}husky init`)
+  if (existsSync(resolve(cwd, '.husky/pre-commit'))) {
+    printWarn('.husky/pre-commit already exists, skipped.')
+  }
+  else {
+    await w('.husky/pre-commit', getCommitPreHook())
+  }
+  if (existsSync(resolve(cwd, '.husky/commit-msg'))) {
+    printWarn('.husky/commit-msg already exists, skipped.')
+  }
+  else {
+    await w('.husky/commit-msg', getCommitMsgHook())
+  }
   spinner.success('husky config succeed!')
 
   // write in package.json
   spinner.start('package.json writing...')
-  const o = getPackageJSON() as any
-  (o.scripts ||= {}).commitlint = 'commitlint --edit'
+  const o = getPackageJSON()!
+  ;(o.scripts ||= {}).commitlint = 'commitlint --edit'
   o['lint-staged'] = {
     '*': 'eslint . --fix',
   }
@@ -73,14 +88,14 @@ export async function init(options: AnyKey) {
   // lint if exit
   if (await checkPackage({ packageName: 'eslint', needInstall: false })) {
     spinner.start('lint running')
-    let o = getPackageJSON() as any
+    let o = getPackageJSON()!
     const LINT_SCRIPT = '__hubery__:fix'
     ;(o.scripts ||= {})[LINT_SCRIPT] = `eslint package.json ${name} --fix || true`
     await writePackageJSON(o)
     const runCommand = getRunCommand()
     await execCommand(`${runCommand} ${LINT_SCRIPT}`)
-    o = getPackageJSON()
-    delete o.scripts[LINT_SCRIPT]
+    o = getPackageJSON()!
+    delete o.scripts![LINT_SCRIPT]
     await writePackageJSON(o)
     spinner.success('lint down!')
   }

@@ -30,7 +30,7 @@ todo-scripts 把这些打包成一条命令，`commitlint-init` 执行完就全�
 ### 🎬 演示
 
 <div align="center">
-  <img src="https://github.com/Hub-yang/todo-scripts/blob/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
+  <img src="https://raw.githubusercontent.com/Hub-yang/todo-scripts/dev/src/assets/demo.gif" alt="commitlint-init demo" width="700" />
 </div>
 
 ### 📦 安装
