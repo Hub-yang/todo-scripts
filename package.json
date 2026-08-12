@@ -64,8 +64,5 @@
     "vitest": "^4.1.4",
     "yaml": "^2.9.0",
     "yocto-spinner": "^1.1.0"
-  },
-  "lint-staged": {
-    "*": "eslint . --fix"
   }
 }
