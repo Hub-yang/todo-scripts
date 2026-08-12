@@ -89,3 +89,6 @@ __snapshots__/
 .fusebox/
 .dynamodb/
 *.tgz
+
+# --- 个人维护，不进版本库 (Personal, not version-controlled) ---
+CLAUDE.md
