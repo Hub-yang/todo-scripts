@@ -3,44 +3,51 @@ import process from 'node:process'
 import mri from 'mri'
 import colors from 'picocolors'
 import spinner from 'yocto-spinner'
-import { DEFAULT_PKG_NAME, HELP_MESSAGE } from '@/constants'
-import { banner, printWarn, uninstallPkg } from '@/utils'
+import { DEFAULT_PKG_NAME } from '@/constants'
+import { findScript, renderHelp } from '@/registry'
+import { banner, ScriptError } from '@/utils'
+import { createPackageManager } from '@/utils/package-manager'
+
+/**
+ * 供 bin/index.js 收口使用
+ *
+ * 不能让 bin 直接 import '@/utils' 的产物：tsdown 把共享代码打进带 hash 的
+ * chunk（如 dist/constants-CaIpLqQE.js），文件名每次构建都可能变。
+ * dist/main.js 是唯一稳定的入口，所以由它转出去。
+ */
+export { printErr, ScriptError } from '@/utils'
 
 const { bold, green } = colors
 
 export async function main() {
   banner()
-  const scriptsMap: string[] = ['commitlint-init']
-  const script = process.argv[2]
-  const options = mri<ArgvOptions>(process.argv.slice(3), {
+  // 从 argv[2] 起解析，因此 `hubery --help` 和 `hubery <script> --help` 都成立
+  const options = mri<ArgvOptions>(process.argv.slice(2), {
     boolean: ['clear', 'czgit', 'help'],
     alias: { h: 'help' },
   })
 
   if (options.help) {
-    console.log(HELP_MESSAGE)
+    console.log(renderHelp())
     return false
   }
 
-  if (script && scriptsMap.includes(script)) {
-    const { init } = await import(`./${script}.js`)
-    const startTime = Date.now()
-    console.log(`⚡️ ${bold(green('Process Start'))}\n`)
+  const script = findScript(options._[0])
+  if (!script)
+    throw new ScriptError('Please use a script.')
 
-    await init(options)
+  const { init } = await script.load()
+  const startTime = Date.now()
+  console.log(`⚡️ ${bold(green('Process Start'))}\n`)
 
-    const endTime = Date.now()
-    const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
-    console.log(`\n✨ ${green(bold('Process Down')) + bold(` in ${elapsedTime}s`)}\n`)
-    // Check whether to uninstall
-    if (options.clear) {
-      await uninstallPkg(DEFAULT_PKG_NAME)
-      spinner().success(`clear down!`)
-      process.exit()
-    }
-  }
-  else {
-    printWarn('Please use a script.')
-    process.exit(1)
+  await init(options)
+
+  const endTime = Date.now()
+  const elapsedTime = ((endTime - startTime) / 1000).toFixed(1)
+  console.log(`\n✨ ${green(bold('Process Down')) + bold(` in ${elapsedTime}s`)}\n`)
+  // Check whether to uninstall
+  if (options.clear) {
+    await createPackageManager().uninstall(DEFAULT_PKG_NAME)
+    spinner().success(`clear down!`)
   }
 }

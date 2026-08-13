@@ -1,5 +1,5 @@
 /* eslint-disable regexp/no-unused-capturing-group */
-import fs, { existsSync } from 'node:fs'
+import fs from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import path, { resolve } from 'node:path'
 import process from 'node:process'
@@ -8,7 +8,6 @@ import { execaCommand } from 'execa'
 import colors from 'picocolors'
 import terminalLink from 'terminal-link'
 import { parse as parseYaml } from 'yaml'
-import yoctoSpinner from 'yocto-spinner'
 import { DEFAULT_PKG_NAME, REPO_URL } from '@/constants'
 
 export interface ArgvOptions {
@@ -27,23 +26,21 @@ export interface PackageJsonLike {
   [key: string]: any
 }
 
-interface CheckOptions {
-  packageName: string
-  saveMode?: string
-  needImport?: boolean
-  needInstall?: boolean
-}
-
-interface ModuleDesc {
-  module: any
-}
-
-interface PkgInfo {
-  name: string
-  version: string
-}
-
 const { bold, italic, blue, dim, bgYellow, bgRed } = colors
+
+/**
+ * 脚本执行过程中的预期内失败
+ *
+ * 叶子函数只负责抛出它，不负责打印、更不负责结束进程；
+ * 收口在 bin/index.js —— 那里是唯一调用 process.exit 的地方。
+ * 非 ScriptError 的错误视为真实 bug，交给 node 打完整堆栈。
+ */
+export class ScriptError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options)
+    this.name = 'ScriptError'
+  }
+}
 
 /**
  * print warning message
@@ -131,42 +128,6 @@ function getPkgInfo() {
 }
 
 /**
- * uninstall pkg
- * @param {string} pkg - package name
- */
-export async function uninstallPkg(pkg: string) {
-  const s = yoctoSpinner({ text: 'uninstall running' }).start()
-  try {
-    const uninstallCommand = getUninstallCommand()
-    const command = `${uninstallCommand} ${pkg}`
-    await execaCommand(command)
-    s.success(`succeed to uninstall ${pkg}!`)
-  }
-  catch {
-    s.stop()
-    printErr(`Failed to uninstall ${pkg}.`)
-    process.exit(1)
-  }
-}
-
-/**
- * execute instal command
- * @param {string} pkg - package name
- */
-export async function importPkg(pkg: string) {
-  try {
-    const module = await import(pkg)
-    return {
-      module: module?.default || module?.[pkg],
-    }
-  }
-  catch {
-    printErr(`Failed to import ${pkg}.`)
-    process.exit(1)
-  }
-}
-
-/**
  * execute command
  * @param {string} command - command to be executed
  */
@@ -174,44 +135,18 @@ export async function execCommand(command: string) {
   try {
     await execaCommand(command)
   }
-  catch {
-    printErr(`Failed to execute '${command}'.`)
-    process.exit(1)
+  catch (e) {
+    throw new ScriptError(`Failed to execute '${command}'.`, { cause: e })
   }
 }
 
 /**
  * check whether the specified package has been installed
- * @param {any} options - options
+ * @param {string} pkg - package name
+ * @returns {boolean} - result
  */
-export async function checkPackage(options: CheckOptions): Promise<ModuleDesc | boolean | undefined> {
-  const {
-    packageName: p,
-    saveMode: t = '',
-    needImport = false,
-    needInstall = true,
-  } = options
-  const cwd = process.cwd()
-  const path = resolve(cwd, `node_modules/${p}`)
-
-  if (existsSync(path)) {
-    if (needImport) {
-      const data = await importPkg(p)
-      return data
-    }
-    return true
-  }
-  else {
-    if (!needInstall)
-      return false
-    const installCommand = getInstallCommand()
-    const command = `${installCommand} ${p} ${t}`
-    await execCommand(command)
-    if (needImport) {
-      const data = await importPkg(p)
-      return data
-    }
-  }
+export function isInstalled(pkg: string): boolean {
+  return isRootFileExist(`node_modules/${pkg}`)
 }
 
 /**
@@ -231,9 +166,13 @@ export function isRootFileExist(file: string): boolean {
  * @returns {boolean} - result
  */
 export function isMonorepo(): boolean {
-  const pkg = getPackageJSON()
-  if (Array.isArray(pkg?.workspaces) && pkg.workspaces.length > 0)
-    return true
+  // 谓词不应该终止流程：没有 package.json 时判定为非 monorepo，
+  // 而不是让 getPackageJSON 的「文件不存在」错误从这里抛出去
+  if (isRootFileExist('package.json')) {
+    const pkg = getPackageJSON()
+    if (Array.isArray(pkg.workspaces) && pkg.workspaces.length > 0)
+      return true
+  }
 
   if (!isRootFileExist('pnpm-workspace.yaml'))
     return false
@@ -261,20 +200,22 @@ export function isTsProject(): boolean {
 
 /**
  * get the package.json in object format
+ *
+ * 文件不存在或解析失败一律抛错，因此调用方拿到的一定是有效对象、无需再判空
  */
-export function getPackageJSON(): PackageJsonLike | undefined {
+export function getPackageJSON(): PackageJsonLike {
   const cwd = process.cwd()
   const path = resolve(cwd, 'package.json')
-  if (isRootFileExist('package.json')) {
-    try {
-      const raw = fs.readFileSync(path, 'utf-8')
-      const data = JSON.parse(raw)
-      return data
-    }
-    catch {
-      printErr('Failed to parse package.json.')
-      process.exit(1)
-    }
+  if (!isRootFileExist('package.json'))
+    throw new ScriptError('Cannot find package.json in the current directory.')
+
+  try {
+    const raw = fs.readFileSync(path, 'utf-8')
+    const data = JSON.parse(raw)
+    return data
+  }
+  catch (e) {
+    throw new ScriptError('Failed to parse package.json.', { cause: e })
   }
 }
 
@@ -286,90 +227,7 @@ export async function writePackageJSON(data: PackageJsonLike) {
   try {
     await w('package.json', `${JSON.stringify(data, null, 2)}\n`)
   }
-  catch {
-    printErr('Failed to write in package.json.')
-    process.exit(1)
-  }
-}
-
-/**
- * get the current package manager from user agent
- * @returns {PkgInfo} package manager info, include name and version
- */
-export function getPkgManager(): PkgInfo | undefined {
-  const userAgent = process.env.npm_config_user_agent
-  if (!userAgent) {
-    return undefined
-  }
-
-  const pkgSpec = userAgent.split(' ')[0]
-  const pkgSpecArr = pkgSpec.split('/')
-  return {
-    name: pkgSpecArr[0],
-    version: pkgSpecArr[1],
-  }
-}
-
-/**
- * match the package manager install command
- * @returns {string} package manager install command
- */
-export function getInstallCommand(): string {
-  const pkgManager = getPkgManager()?.name || 'npm'
-  const monorepo = isMonorepo()
-  if (monorepo) {
-    if (pkgManager === 'pnpm')
-      return 'pnpm add -w'
-    if (pkgManager === 'yarn')
-      return 'yarn add -W'
-  }
-  return `${pkgManager} install`
-}
-
-/**
- * match the package manager uninstall command
- * @returns {string} package manager uninstall command
- */
-export function getUninstallCommand(): string {
-  const pkgManager = getPkgManager()?.name || 'npm'
-  const monorepo = isMonorepo()
-  const base = pkgManager === 'npm' ? `${pkgManager} uninstall` : `${pkgManager} remove`
-  if (monorepo) {
-    if (pkgManager === 'pnpm')
-      return `${base} -w`
-    if (pkgManager === 'yarn')
-      return `${base} -W`
-  }
-  return base
-}
-
-/**
- * match the package manager run command
- * @returns {string} package manager run command
- */
-export function getRunCommand(): string {
-  const pkgManager = getPkgManager()?.name || 'npm'
-  return `${pkgManager} run`
-}
-
-/**
- * match the package manager exec command
- * @returns {string} package manager exec command
- */
-export function getExecCommand(): string {
-  const pkgManager = getPkgManager()?.name || 'npm'
-  switch (pkgManager) {
-    case 'npm':
-      return 'npx '
-    case 'pnpm':
-      return 'pnpm exec '
-    case 'yarn':
-      return 'yarn '
-    case 'bun':
-      return 'bunx '
-    case 'deno':
-      return 'deno run -A npm:'
-    default:
-      return 'npx'
+  catch (e) {
+    throw new ScriptError('Failed to write in package.json.', { cause: e })
   }
 }

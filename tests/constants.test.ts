@@ -3,9 +3,6 @@ import {
   CONFIG_COMMITLINT,
   CONFIG_COMMITLINT_CZGIT,
   DEFAULT_PKG_NAME,
-  getCommitMsgHook,
-  getCommitPreHook,
-  HELP_MESSAGE,
   REPO_URL,
 } from '@/constants'
 
@@ -18,20 +15,6 @@ describe('基础常量', () => {
   it('repo_URL 应该是有效的 GitHub 仓库地址', () => {
     expect(REPO_URL).toContain('github.com')
     expect(REPO_URL).toContain('todo-scripts')
-  })
-})
-
-// HELP_MESSAGE - 帮助信息
-describe('help_MESSAGE', () => {
-  it('应该包含可用指令 commitlint-init', () => {
-    expect(HELP_MESSAGE).toContain('commitlint-init')
-  })
-
-  it('应该包含所有参数说明', () => {
-    // 检查所有支持的命令行参数是否都在帮助信息中
-    expect(HELP_MESSAGE).toContain('--help')
-    expect(HELP_MESSAGE).toContain('--clear')
-    expect(HELP_MESSAGE).toContain('--czgit')
   })
 })
 
@@ -82,23 +65,5 @@ describe('config_COMMITLINT_CZGIT', () => {
     // 每个 type 都应该有 "中文 | English" 格式的 name
     expect(CONFIG_COMMITLINT_CZGIT).toContain('新增功能 | A new feature')
     expect(CONFIG_COMMITLINT_CZGIT).toContain('修复缺陷 | A bug fix')
-  })
-})
-
-// getCommitPreHook / getCommitMsgHook - husky 钩子模板
-describe('husky 钩子模板', () => {
-  it('getCommitPreHook 应该包含 lint-staged 命令', () => {
-    // pre-commit 钩子应该运行 lint-staged
-    expect(getCommitPreHook()).toContain('lint-staged')
-  })
-
-  it('getCommitMsgHook 应该包含 commitlint 命令', () => {
-    // commit-msg 钩子应该运行 commitlint
-    expect(getCommitMsgHook()).toContain('commitlint')
-  })
-
-  it('getCommitMsgHook 应该包含 --edit 参数', () => {
-    // commitlint 需要 --edit 参数来读取提交信息
-    expect(getCommitMsgHook()).toContain('--edit')
   })
 })

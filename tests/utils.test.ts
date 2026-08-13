@@ -1,249 +1,27 @@
 import fs from 'node:fs'
+import { writeFile } from 'node:fs/promises'
 import process from 'node:process'
+import { execaCommand } from 'execa'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  getExecCommand,
-  getInstallCommand,
+  execCommand,
   getPackageJSON,
-  getPkgManager,
-  getRunCommand,
-  getUninstallCommand,
+  isInstalled,
   isMonorepo,
   isRootFileExist,
   isTsProject,
   printErr,
   printWarn,
+  ScriptError,
+  writePackageJSON,
 } from '@/utils'
 
-// ========================================
-// getPkgManager - 检测当前使用的包管理器
-// ========================================
-describe('getPkgManager', () => {
-  // 每个测试运行后，恢复环境变量到原始状态，避免测试之间互相干扰
-  const originalUserAgent = process.env.npm_config_user_agent
-
-  afterEach(() => {
-    if (originalUserAgent === undefined) {
-      delete process.env.npm_config_user_agent
-    }
-    else {
-      process.env.npm_config_user_agent = originalUserAgent
-    }
-  })
-
-  it('应该正确解析 pnpm 的 user agent', () => {
-    // 模拟 pnpm 环境下的 user agent 字符串
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    const result = getPkgManager()
-    expect(result).toEqual({ name: 'pnpm', version: '10.33.0' })
-  })
-
-  it('应该正确解析 npm 的 user agent', () => {
-    process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
-    const result = getPkgManager()
-    expect(result).toEqual({ name: 'npm', version: '10.2.0' })
-  })
-
-  it('应该正确解析 yarn 的 user agent', () => {
-    process.env.npm_config_user_agent = 'yarn/1.22.19 npm/? node/v20.10.0'
-    const result = getPkgManager()
-    expect(result).toEqual({ name: 'yarn', version: '1.22.19' })
-  })
-
-  it('应该正确解析 bun 的 user agent', () => {
-    process.env.npm_config_user_agent = 'bun/1.0.0 npm/? node/v20.10.0'
-    const result = getPkgManager()
-    expect(result).toEqual({ name: 'bun', version: '1.0.0' })
-  })
-
-  it('当 user agent 不存在时应该返回 undefined', () => {
-    // 删除环境变量，模拟非包管理器环境直接执行的情况
-    delete process.env.npm_config_user_agent
-    const result = getPkgManager()
-    expect(result).toBeUndefined()
-  })
-})
-
-// ========================================
-// getInstallCommand - 获取安装命令
-// ========================================
-describe('getInstallCommand', () => {
-  const originalUserAgent = process.env.npm_config_user_agent
-
-  afterEach(() => {
-    if (originalUserAgent === undefined) {
-      delete process.env.npm_config_user_agent
-    }
-    else {
-      process.env.npm_config_user_agent = originalUserAgent
-    }
-    // 恢复所有被 vi.spyOn 修改的函数
-    vi.restoreAllMocks()
-  })
-
-  it('npm 环境下应该返回 "npm install"', () => {
-    process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
-    // 模拟非 monorepo 环境
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(getInstallCommand()).toBe('npm install')
-  })
-
-  it('pnpm 环境下应该返回 "pnpm install"', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(getInstallCommand()).toBe('pnpm install')
-  })
-
-  it('pnpm monorepo 环境下应该返回 "pnpm add -w"', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    // 模拟 pnpm-workspace.yaml 文件存在，且声明了非空 packages 字段
-    vi.spyOn(fs, 'existsSync').mockReturnValue(true)
-    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
-      if (String(p).includes('pnpm-workspace.yaml'))
-        return 'packages:\n  - packages/*\n'
-      return JSON.stringify({ name: 'test' })
-    })
-    expect(getInstallCommand()).toBe('pnpm add -w')
-  })
-
-  it('yarn monorepo 环境下应该返回 "yarn add -W"', () => {
-    process.env.npm_config_user_agent = 'yarn/1.22.19 npm/? node/v20.10.0'
-    // 模拟 pnpm-workspace.yaml 不存在，但 package.json 有 workspaces 字段
-    vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      return !String(p).includes('pnpm-workspace.yaml')
-    })
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ workspaces: ['packages/*'] }))
-    expect(getInstallCommand()).toBe('yarn add -W')
-  })
-
-  it('没有 user agent 时应该回退到 "npm install"', () => {
-    delete process.env.npm_config_user_agent
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(getInstallCommand()).toBe('npm install')
-  })
-})
-
-// ========================================
-// getUninstallCommand - 获取卸载命令
-// ========================================
-describe('getUninstallCommand', () => {
-  const originalUserAgent = process.env.npm_config_user_agent
-
-  afterEach(() => {
-    if (originalUserAgent === undefined) {
-      delete process.env.npm_config_user_agent
-    }
-    else {
-      process.env.npm_config_user_agent = originalUserAgent
-    }
-    vi.restoreAllMocks()
-  })
-
-  it('npm 环境下应该返回 "npm uninstall"', () => {
-    process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(getUninstallCommand()).toBe('npm uninstall')
-  })
-
-  it('pnpm 环境下应该返回 "pnpm remove"', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(getUninstallCommand()).toBe('pnpm remove')
-  })
-
-  it('pnpm monorepo 环境下应该返回 "pnpm remove -w"', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    // 模拟 pnpm-workspace.yaml 文件存在，且声明了非空 packages 字段
-    vi.spyOn(fs, 'existsSync').mockReturnValue(true)
-    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
-      if (String(p).includes('pnpm-workspace.yaml'))
-        return 'packages:\n  - packages/*\n'
-      return JSON.stringify({ name: 'test' })
-    })
-    expect(getUninstallCommand()).toBe('pnpm remove -w')
-  })
-
-  it('yarn monorepo 环境下应该返回 "yarn remove -W"', () => {
-    process.env.npm_config_user_agent = 'yarn/1.22.19 npm/? node/v20.10.0'
-    vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      return !String(p).includes('pnpm-workspace.yaml')
-    })
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ workspaces: ['packages/*'] }))
-    expect(getUninstallCommand()).toBe('yarn remove -W')
-  })
-})
-
-// ========================================
-// getRunCommand - 获取运行脚本命令
-// ========================================
-describe('getRunCommand', () => {
-  const originalUserAgent = process.env.npm_config_user_agent
-
-  afterEach(() => {
-    if (originalUserAgent === undefined) {
-      delete process.env.npm_config_user_agent
-    }
-    else {
-      process.env.npm_config_user_agent = originalUserAgent
-    }
-  })
-
-  it('npm 环境下应该返回 "npm run"', () => {
-    process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
-    expect(getRunCommand()).toBe('npm run')
-  })
-
-  it('pnpm 环境下应该返回 "pnpm run"', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    expect(getRunCommand()).toBe('pnpm run')
-  })
-})
-
-// ========================================
-// getExecCommand - 获取执行命令
-// ========================================
-describe('getExecCommand', () => {
-  const originalUserAgent = process.env.npm_config_user_agent
-
-  afterEach(() => {
-    if (originalUserAgent === undefined) {
-      delete process.env.npm_config_user_agent
-    }
-    else {
-      process.env.npm_config_user_agent = originalUserAgent
-    }
-  })
-
-  it('npm 环境下应该返回 "npx "', () => {
-    process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
-    expect(getExecCommand()).toBe('npx ')
-  })
-
-  it('pnpm 环境下应该返回 "pnpm exec "', () => {
-    process.env.npm_config_user_agent = 'pnpm/10.33.0 npm/? node/v22.12.0'
-    expect(getExecCommand()).toBe('pnpm exec ')
-  })
-
-  it('yarn 环境下应该返回 "yarn "', () => {
-    process.env.npm_config_user_agent = 'yarn/1.22.19 npm/? node/v20.10.0'
-    expect(getExecCommand()).toBe('yarn ')
-  })
-
-  it('bun 环境下应该返回 "bunx "', () => {
-    process.env.npm_config_user_agent = 'bun/1.0.0 npm/? node/v20.10.0'
-    expect(getExecCommand()).toBe('bunx ')
-  })
-
-  it('deno 环境下应该返回 "deno run -A npm:"', () => {
-    process.env.npm_config_user_agent = 'deno/1.40.0 npm/? node/v20.10.0'
-    expect(getExecCommand()).toBe('deno run -A npm:')
-  })
-
-  it('未知包管理器应该回退到 "npx"', () => {
-    delete process.env.npm_config_user_agent
-    expect(getExecCommand()).toBe('npx ')
-  })
-})
+// 失败路径用：execa 与写文件都要能按需失败，spinner 不能在测试输出里转
+vi.mock('execa', () => ({ execaCommand: vi.fn(async () => {}) }))
+vi.mock('node:fs/promises', () => ({ writeFile: vi.fn(async () => {}) }))
+vi.mock('yocto-spinner', () => ({
+  default: () => ({ start: vi.fn(function (this: any) { return this }), success: vi.fn(), stop: vi.fn() }),
+}))
 
 // ========================================
 // isRootFileExist - 检查项目根目录文件是否存在
@@ -377,11 +155,18 @@ describe('getPackageJSON', () => {
     expect(pkg!.version).toMatch(/^\d+\.\d+\.\d+/)
   })
 
-  it('当 package.json 不存在时应该返回 undefined', () => {
-    // 模拟文件不存在的场景
+  it('当 package.json 不存在时应该抛出 ScriptError', () => {
+    // 模拟文件不存在的场景：不再返回 undefined，调用方因此无需判空
     vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    const result = getPackageJSON()
-    expect(result).toBeUndefined()
+    expect(() => getPackageJSON()).toThrow(ScriptError)
+    expect(() => getPackageJSON()).toThrow('Cannot find package.json')
+    vi.restoreAllMocks()
+  })
+
+  it('当 package.json 内容非法时应该抛出 ScriptError', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockReturnValue('{ not json')
+    expect(() => getPackageJSON()).toThrow('Failed to parse package.json.')
     vi.restoreAllMocks()
   })
 })
@@ -413,5 +198,62 @@ describe('printErr', () => {
     expect(output).toContain('test error')
     expect(output).toContain('ERROR')
     spy.mockRestore()
+  })
+})
+
+// ========================================
+// isInstalled / ensureInstalled - 依赖安装
+// ========================================
+describe('isInstalled', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('node_modules 下存在该包时应该返回 true', () => {
+    const spy = vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    expect(isInstalled('husky')).toBe(true)
+    // 查的是项目根目录下的 node_modules
+    const queried = String(spy.mock.calls[0][0])
+    expect(queried).toContain('node_modules')
+    expect(queried).toContain('husky')
+  })
+
+  it('包不存在时应该返回 false', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
+    expect(isInstalled('husky')).toBe(false)
+  })
+})
+
+// ========================================
+// 失败路径 - 叶子函数只抛 ScriptError，不结束进程
+// ========================================
+describe('失败路径', () => {
+  afterEach(() => {
+    vi.mocked(execaCommand).mockReset()
+    vi.mocked(writeFile).mockReset()
+    vi.restoreAllMocks()
+  })
+
+  it('execCommand 命令失败时应该抛出 ScriptError，并挂上原始错误', async () => {
+    const raw = new Error('exit code 1')
+    vi.mocked(execaCommand).mockRejectedValue(raw)
+    await expect(execCommand('git init')).rejects.toThrow(ScriptError)
+    // 原始错误通过 cause 保留下来，排查时不会丢现场
+    await expect(execCommand('git init')).rejects.toMatchObject({
+      message: `Failed to execute 'git init'.`,
+      cause: raw,
+    })
+  })
+
+  it('writePackageJSON 写入失败时应该抛出 ScriptError', async () => {
+    vi.mocked(writeFile).mockRejectedValue(new Error('EACCES'))
+    await expect(writePackageJSON({ name: 'demo' })).rejects.toThrow('Failed to write in package.json.')
+  })
+
+  it('这些失败都不应该调用 process.exit', async () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+    vi.mocked(execaCommand).mockRejectedValue(new Error('boom'))
+    await expect(execCommand('whatever')).rejects.toThrow()
+    expect(exitSpy).not.toHaveBeenCalled()
   })
 })

@@ -1,23 +1,3 @@
-import { green } from 'picocolors'
-import { getExecCommand } from '@/utils'
-
-export const HELP_MESSAGE = `\
-一些帮助简化前端配置工程的通用脚本
-Utility scripts to simplify frontend project configuration
-
-可用指令 / Available commands:
-${green('commitlint-init')}
-
-用法 / Usage: hubery commitlint-init [参数/options]...
-
-一键生成 commitlint + husky + lint-staged 配置
-Scaffold commitlint + husky + lint-staged config in one command
-
-参数 / Options:
-  -h, --help                         查看帮助 / show help
-  --clear                            清洁执行 - 执行完脚本后卸载模块 / uninstall the module after running
-  --czgit                            配置 cz-git / enable cz-git\n`
-
 export const CONFIG_COMMITLINT
   = `export default {
   extends: ['@commitlint/config-conventional'],
@@ -122,14 +102,6 @@ export default {
   },
 }
 `
-
-export function getCommitPreHook(): string {
-  return `${getExecCommand()}lint-staged`
-}
-
-export function getCommitMsgHook(): string {
-  return `${getExecCommand()}commitlint --edit "$1"`
-}
 
 export const DEFAULT_PKG_NAME = '@huberyyang/todo-scripts'
 export const REPO_URL = 'https://github.com/Hub-yang/todo-scripts'
