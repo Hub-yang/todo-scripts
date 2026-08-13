@@ -34,10 +34,10 @@
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
-    "build:prod": "nr typecheck && nr lint:fix && nr test:run && tsdown",
+    "build:prod": "nr typecheck && nr lint:fix && nr test && tsdown",
     "preview": "nr build && node bin/index.js commitlint-init",
-    "test": "vitest",
-    "test:run": "vitest run",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

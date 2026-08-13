@@ -1,6 +1,6 @@
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
-import { execCommand, isInstalled, isMonorepo, ScriptError } from '@/utils'
+import { execCommand, hasDependency, isMonorepo, ScriptError } from '@/utils'
 
 export interface PkgInfo {
   name: string
@@ -135,7 +135,7 @@ export function createPackageManager(): PackageManager {
     },
 
     async ensureInstalled(pkgs, options = {}) {
-      const missing = pkgs.filter(pkg => !isInstalled(pkg))
+      const missing = pkgs.filter(pkg => !hasDependency(pkg))
       if (missing.length === 0)
         return
 

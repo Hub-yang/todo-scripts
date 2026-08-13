@@ -112,8 +112,11 @@ describe('ensureInstalled', () => {
     process.env.npm_config_user_agent = 'npm/10.2.0 node/v20.10.0'
     vi.spyOn(fs, 'existsSync').mockReturnValue(false)
     const pm = createPackageManager()
-    // 构造完成后再让 node_modules 判定为「都已存在」
+    // 构造完成后再让 node_modules 判定为「都已存在」，
+    // package.json 也必须一起 mock —— 否则会去读本仓库的真实依赖，
+    // 用例就变成了依赖本仓库恰好装了 husky 才通过
     vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ devDependencies: { husky: '^9.1.7' } }))
     await pm.ensureInstalled(['husky'], { dev: true })
     expect(execaCommand).not.toHaveBeenCalled()
   })
@@ -128,7 +131,7 @@ describe('ensureInstalled', () => {
     })
     const pm = createPackageManager()
     // node_modules 判定为不存在，让它真的去装
-    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).includes('node_modules'))
+    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).includes('node_modules/'))
     await pm.ensureInstalled(['husky'], { dev: true })
     expect(execaCommand).toHaveBeenCalledWith('pnpm add -w husky --save-dev')
   })
@@ -138,7 +141,7 @@ describe('ensureInstalled', () => {
     vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).includes('pnpm-workspace.yaml'))
     vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ workspaces: ['packages/*'] }))
     const pm = createPackageManager()
-    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).includes('node_modules'))
+    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).includes('node_modules/'))
     await pm.ensureInstalled(['husky'], { dev: true })
     expect(execaCommand).toHaveBeenCalledWith('yarn add -W husky --dev')
   })

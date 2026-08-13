@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   execCommand,
   getPackageJSON,
-  isInstalled,
+  hasDependency,
   isMonorepo,
   isRootFileExist,
   isTsProject,
@@ -202,25 +202,46 @@ describe('printErr', () => {
 })
 
 // ========================================
-// isInstalled / ensureInstalled - 依赖安装
+// hasDependency - 项目是否已具备某个依赖
 // ========================================
-describe('isInstalled', () => {
+describe('hasDependency', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('node_modules 下存在该包时应该返回 true', () => {
-    const spy = vi.spyOn(fs, 'existsSync').mockReturnValue(true)
-    expect(isInstalled('husky')).toBe(true)
-    // 查的是项目根目录下的 node_modules
-    const queried = String(spy.mock.calls[0][0])
-    expect(queried).toContain('node_modules')
-    expect(queried).toContain('husky')
+  /** node_modules 与 package.json 都存在，package.json 内容由参数决定 */
+  function mockProject(pkgJson: object) {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify(pkgJson))
+  }
+
+  it('装在 node_modules 且写进 devDependencies 时应该返回 true', () => {
+    mockProject({ devDependencies: { husky: '^9.0.0' } })
+    expect(hasDependency('husky')).toBe(true)
   })
 
-  it('包不存在时应该返回 false', () => {
-    vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-    expect(isInstalled('husky')).toBe(false)
+  it('写在 dependencies 里同样算数', () => {
+    mockProject({ dependencies: { husky: '^9.0.0' } })
+    expect(hasDependency('husky')).toBe(true)
+  })
+
+  it('装在 node_modules 但没写进 package.json 时应该返回 false', () => {
+    // 复现被提升的传递依赖场景：目录在，但依赖并没有被声明过，
+    // 只看目录会误判为已装从而跳过安装
+    mockProject({ devDependencies: { '@commitlint/cli': '^21.0.0' } })
+    expect(hasDependency('@commitlint/config-conventional')).toBe(false)
+  })
+
+  it('写进了 package.json 但 node_modules 下不存在时应该返回 false', () => {
+    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).endsWith('node_modules/husky'))
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ devDependencies: { husky: '^9.0.0' } }))
+    expect(hasDependency('husky')).toBe(false)
+  })
+
+  it('没有 package.json 时应该返回 false 而不是抛错', () => {
+    vi.spyOn(fs, 'existsSync').mockImplementation(p => String(p).endsWith('node_modules/husky'))
+    expect(() => hasDependency('husky')).not.toThrow()
+    expect(hasDependency('husky')).toBe(false)
   })
 })
 

@@ -1,12 +1,12 @@
 import type { ArgvOptions, PackageJsonLike } from '@/utils'
 import type { PackageManager } from '@/utils/package-manager'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
 import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT } from '@/constants'
-import { execCommand, getPackageJSON, isInstalled, isTsProject, printWarn, writePackageJSON } from '@/utils'
+import { execCommand, getPackageJSON, hasDependency, isTsProject, printWarn, writePackageJSON } from '@/utils'
 import { createPackageManager } from '@/utils/package-manager'
 
 interface HookFile {
@@ -60,13 +60,20 @@ export function patchPackageJSON(pkg: PackageJsonLike, options: ArgvOptions): Pa
   const patched: PackageJsonLike = {
     ...pkg,
     scripts,
-    'lint-staged': { '*': 'eslint . --fix' },
+    // 命令末尾不加 `.`：加了会让 eslint 对整个仓库而非暂存文件跑，
+    // 拖慢提交且可能被无关文件的历史问题卡住。
+    // 用户已经配过 lint-staged 就不动它，那是用户自己的规则
+    'lint-staged': pkg['lint-staged'] ?? { '*': 'eslint --fix' },
   }
 
   if (options.czgit) {
     scripts.cz = 'git cz'
-    // 与改动前保持一致：整体覆盖 config 字段
-    patched.config = { commitizen: { path: 'node_modules/cz-git' } }
+    // 逐层合并而不是覆盖：cz-git 的配置就放在 config.commitizen 下（path 之外还有
+    // alias/messages/types/scopes 等），只合并外层会让同一类数据丢失在内层复现
+    patched.config = {
+      ...pkg.config,
+      commitizen: { ...pkg.config?.commitizen, path: 'node_modules/cz-git' },
+    }
   }
   else {
     delete scripts.cz
@@ -80,16 +87,23 @@ export function patchPackageJSON(pkg: PackageJsonLike, options: ArgvOptions): Pa
 }
 
 /**
- * 钩子文件已存在就跳过，避免覆盖用户自己的配置
+ * 读出已经存在的钩子文件内容
+ *
+ * 必须在 husky init 之前调用：husky 9 的 init 是无条件覆写
+ * `.husky/pre-commit`（源码里没有任何存在性判断），等它跑完再读
+ * 就只能读到 husky 生成的 `npm test`，用户原本的钩子已经没了
+ * @param {string} cwd - 项目根目录
+ * @param {HookFile[]} hooks - 待写入的钩子
+ * @returns {Map<string, string>} 路径到原内容的映射
  */
-async function writeHookIfAbsent(cwd: string, hook: HookFile) {
-  // 检查和写入用同一个解析后的路径，不混用相对路径
-  const target = resolve(cwd, hook.path)
-  if (existsSync(target)) {
-    printWarn(`${hook.path} already exists, skipped.`)
-    return
+function snapshotExistingHooks(cwd: string, hooks: HookFile[]): Map<string, string> {
+  const snapshot = new Map<string, string>()
+  for (const hook of hooks) {
+    const target = resolve(cwd, hook.path)
+    if (existsSync(target))
+      snapshot.set(hook.path, readFileSync(target, 'utf-8'))
   }
-  await w(target, hook.content)
+  return snapshot
 }
 
 export async function init(options: ArgvOptions) {
@@ -126,9 +140,15 @@ export async function init(options: ArgvOptions) {
 
   // config husky
   spinner.start('husky config running...')
+  const existingHooks = snapshotExistingHooks(cwd, plan.hooks)
   await pm.exec('husky init')
-  for (const hook of plan.hooks)
-    await writeHookIfAbsent(cwd, hook)
+  for (const hook of plan.hooks) {
+    const original = existingHooks.get(hook.path)
+    // 用户本来就有这个钩子：把 husky init 可能已经覆写掉的内容原样还回去
+    await w(resolve(cwd, hook.path), original ?? hook.content)
+    if (original !== undefined)
+      printWarn(`${hook.path} already exists, kept your version.`)
+  }
   spinner.success('husky config succeed!')
 
   // write in package.json
@@ -137,7 +157,7 @@ export async function init(options: ArgvOptions) {
   spinner.success('package.json writing succeed!')
 
   // lint if exit
-  if (isInstalled('eslint')) {
+  if (hasDependency('eslint')) {
     spinner.start('lint running')
     // 直接执行项目本地的 eslint，不再往用户 package.json 里塞临时脚本；
     // 格式化失败不影响初始化结果，配置文件此时已经写好了

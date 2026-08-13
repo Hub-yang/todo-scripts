@@ -18,9 +18,12 @@ export interface ArgvOptions {
 
 export interface PackageJsonLike {
   'scripts'?: Record<string, string>
+  'dependencies'?: Record<string, string>
+  'devDependencies'?: Record<string, string>
   'lint-staged'?: Record<string, string>
   'config'?: {
-    commitizen?: { path: string }
+    // cz-git 在 path 之外还支持 alias / messages / types / scopes 等字段
+    commitizen?: { path: string, [key: string]: any }
     [key: string]: any
   }
   [key: string]: any
@@ -141,12 +144,32 @@ export async function execCommand(command: string) {
 }
 
 /**
- * check whether the specified package has been installed
+ * 读取 package.json，文件不存在时返回 undefined
+ *
+ * 与 getPackageJSON 的区别只在于吞掉「文件不存在」这一种情况；
+ * 内容解析失败仍然抛错 —— 那是真实错误，不该被静默
+ * @returns {PackageJsonLike | undefined} - package.json 内容
+ */
+function tryReadPackageJSON(): PackageJsonLike | undefined {
+  return isRootFileExist('package.json') ? getPackageJSON() : undefined
+}
+
+/**
+ * 项目是否已经具备这个依赖
+ *
+ * 需要同时满足：node_modules 下确实存在，且 package.json 里声明过。
+ * 只看 node_modules 会被提升上来的传递依赖骗过 —— 依赖并没有写进
+ * package.json，却被判定为「已安装」而跳过安装；只看声明则可能拿到
+ * 一个没有真正装上的包。
  * @param {string} pkg - package name
  * @returns {boolean} - result
  */
-export function isInstalled(pkg: string): boolean {
-  return isRootFileExist(`node_modules/${pkg}`)
+export function hasDependency(pkg: string): boolean {
+  if (!isRootFileExist(`node_modules/${pkg}`))
+    return false
+
+  const json = tryReadPackageJSON()
+  return Boolean(json?.dependencies?.[pkg] || json?.devDependencies?.[pkg])
 }
 
 /**
@@ -168,11 +191,9 @@ export function isRootFileExist(file: string): boolean {
 export function isMonorepo(): boolean {
   // 谓词不应该终止流程：没有 package.json 时判定为非 monorepo，
   // 而不是让 getPackageJSON 的「文件不存在」错误从这里抛出去
-  if (isRootFileExist('package.json')) {
-    const pkg = getPackageJSON()
-    if (Array.isArray(pkg.workspaces) && pkg.workspaces.length > 0)
-      return true
-  }
+  const pkg = tryReadPackageJSON()
+  if (Array.isArray(pkg?.workspaces) && pkg.workspaces.length > 0)
+    return true
 
   if (!isRootFileExist('pnpm-workspace.yaml'))
     return false
