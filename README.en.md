@@ -89,7 +89,7 @@ bunx hubery commitlint-init
 #### 🎉 Test
 
 > [!NOTE]
-> ESLint runs automatically before every commit. To change the pre-commit hook command, update the **lint-staged** config in **package.json**.
+> ESLint runs automatically before every commit. To change the pre-commit hook command, edit **lint-staged.config.mjs**.
 
 ```shell
 git add .
@@ -126,7 +126,7 @@ Detects monorepo setups and automatically appends the workspace flag for each pa
 If `git init` has not been run in the current directory (no `.git` folder), the script initializes a Git repository automatically so husky hooks can be registered properly.
 
 **🔍 Auto-integrate ESLint**
-If an ESLint config file exists in the project, the script runs lint fix on the generated `commitlint.config.*` to ensure it matches the project's code style — ready to commit immediately.
+If ESLint is installed in the project (present in `node_modules` and declared in `package.json`), the script runs lint fix on the generated config files to ensure they match the project's code style — ready to commit immediately.
 
 #### 📁 Generated Files
 
@@ -135,10 +135,11 @@ After running the script, the following files are added or modified in your proj
 ```
 your-project/
 ├── .husky/
-│   ├── pre-commit        # Runs lint-staged before every commit
-│   └── commit-msg        # Validates commit message format
-├── commitlint.config.ts  # commitlint config (or .js for JS projects)
-└── package.json          # lint-staged config and commitlint script added
+│   ├── pre-commit          # Runs lint-staged before every commit
+│   └── commit-msg          # Validates commit message format
+├── commitlint.config.ts    # commitlint config (or .js for JS projects)
+├── lint-staged.config.mjs  # lint-staged rules (always .mjs, unaffected by the project's type field)
+└── package.json            # commitlint script added
 ```
 
 New additions to `package.json`:
@@ -147,10 +148,15 @@ New additions to `package.json`:
 {
   "scripts": {
     "commitlint": "commitlint --edit"
-  },
-  "lint-staged": {
-    "*": "eslint . --fix"
   }
+}
+```
+
+Default content of `lint-staged.config.mjs`:
+
+```js
+export default {
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix',
 }
 ```
 

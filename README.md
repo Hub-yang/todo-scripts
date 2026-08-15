@@ -89,7 +89,7 @@ bunx hubery commitlint-init
 #### 🎉 测试
 
 > [!NOTE]
-> eslint 会在每次执行 commit 前自动执行，如需更改 commit 钩子执行前的命令，可自行修改 **package.json** 中 **lint-staged** 配置
+> eslint 会在每次执行 commit 前自动执行，如需更改 commit 钩子执行前的命令，可自行修改 **lint-staged.config.mjs**
 
 ```shell
 git add .
@@ -126,7 +126,7 @@ git commit -m "test commitlint"
 若当前目录尚未执行过 `git init`（不存在 `.git` 目录），脚本会自动初始化 git 仓库，确保 husky hooks 能正常注册
 
 **🔍 自动集成 ESLint**
-若项目中已存在 ESLint 配置文件，脚本在生成 `commitlint.config.*` 后会自动对其执行 lint fix，确保生成的配置文件符合项目代码风格，直接提交即可
+若项目已安装 ESLint（`node_modules` 存在且 `package.json` 中声明了依赖），脚本在生成配置文件后会自动对其执行 lint fix，确保生成的配置文件符合项目代码风格，直接提交即可
 
 #### 📁 执行后生成的内容
 
@@ -135,10 +135,11 @@ git commit -m "test commitlint"
 ```
 your-project/
 ├── .husky/
-│   ├── pre-commit        # 每次 commit 前自动运行 lint-staged
-│   └── commit-msg        # 自动校验 commit message 格式
-├── commitlint.config.ts  # commitlint 配置（JS 项目则为 .js）
-└── package.json          # 自动写入 lint-staged 配置和 commitlint 脚本
+│   ├── pre-commit          # 每次 commit 前自动运行 lint-staged
+│   └── commit-msg          # 自动校验 commit message 格式
+├── commitlint.config.ts    # commitlint 配置（JS 项目则为 .js）
+├── lint-staged.config.mjs  # lint-staged 规则（固定 .mjs，不受项目 type 字段影响）
+└── package.json            # 自动写入 commitlint 脚本
 ```
 
 `package.json` 中新增的内容：
@@ -147,10 +148,15 @@ your-project/
 {
   "scripts": {
     "commitlint": "commitlint --edit"
-  },
-  "lint-staged": {
-    "*": "eslint . --fix"
   }
+}
+```
+
+`lint-staged.config.mjs` 的默认内容：
+
+```js
+export default {
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix',
 }
 ```
 
