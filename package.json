@@ -40,7 +40,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint --fix",
     "release": "nr build:prod && bumpp && npm publish",
     "taze": "npx taze major -r",
     "prepare": "husky",

@@ -7,5 +7,7 @@ export default defineConfig({
   minify: true,
   tsconfig: 'tsconfig.json',
   fixedExtension: false,
-  inlineOnly: false,
+  deps: {
+    onlyBundle: false,
+  },
 })
