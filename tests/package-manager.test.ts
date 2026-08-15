@@ -171,7 +171,7 @@ describe('uninstall', () => {
 
 describe('exec / formatExec', () => {
   it.each([
-    ['npm/10.2.0 node/v20.10.0', 'npx husky init'],
+    ['npm/10.2.0 node/v20.10.0', 'npx --no -- husky init'],
     ['pnpm/10.33.0 npm/? node/v22.12.0', 'pnpm exec husky init'],
     ['yarn/1.22.19 npm/? node/v20.10.0', 'yarn husky init'],
     ['bun/1.0.0 npm/? node/v20.10.0', 'bunx husky init'],
@@ -199,7 +199,7 @@ describe('exec / formatExec', () => {
   it('认不出的包管理器拼出的命令不应该缺少空格', async () => {
     // 旧实现的 default 分支返回的是 'npx'（少一个结尾空格），会拼成 npxhusky
     const pm = usePkgManager('cnpm/1.0.0 node/v20.10.0')
-    expect(pm.formatExec('husky init')).toBe('npx husky init')
+    expect(pm.formatExec('husky init')).toBe('npx --no -- husky init')
   })
 })
 

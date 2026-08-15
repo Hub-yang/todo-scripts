@@ -49,7 +49,10 @@ const SPECS: Record<string, PkgManagerSpec> = {
     add: 'install',
     devFlag: '--save-dev',
     remove: 'uninstall',
-    exec: command => `npx ${command}`,
+    // --no 阻止 npx 在本地找不到命令时联网安装；调用发生时对应的包
+    // （husky/eslint/commitlint）都已经被 ensureInstalled/hasDependency 确认本地存在，
+    // 不会改变正常路径的行为，只是让 npx 调用不再有兜底联网安装的不确定性
+    exec: command => `npx --no -- ${command}`,
   },
   pnpm: {
     add: 'add',
