@@ -11,5 +11,6 @@ export default antfu({
     'template-*',
     '**/dist/**',
     'docs/superpowers/**',
+    '.superpowers/**',
   ],
 })

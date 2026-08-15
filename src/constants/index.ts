@@ -105,7 +105,7 @@ export default {
 
 export const CONFIG_LINT_STAGED
   = `export default {
-  '*': 'eslint --fix',
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix',
 }
 `
 

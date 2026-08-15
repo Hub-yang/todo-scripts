@@ -59,10 +59,11 @@ describe('planSetup', () => {
     expect(planSetup({}, { isTsProject: false, pm }).lintStagedConfigFile.name).toBe('lint-staged.config.mjs')
   })
 
-  it('lint-staged 配置文件内容应该等价于默认规则', () => {
+  it('lint-staged 配置文件内容应该按扩展名分组，而不是匹配所有文件', () => {
     const { content } = planSetup({}, { isTsProject: true, pm }).lintStagedConfigFile
     expect(content).toContain('export default')
-    expect(content).toContain('eslint --fix')
+    expect(content).toContain(`'*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix'`)
+    expect(content).not.toMatch(/'\*':\s*'eslint --fix'/)
   })
 })
 
