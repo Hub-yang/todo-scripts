@@ -10,5 +10,6 @@ export default antfu({
     '**/node_modules/**',
     'template-*',
     '**/dist/**',
+    'docs/superpowers/**',
   ],
 })
