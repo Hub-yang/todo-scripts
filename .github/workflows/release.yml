@@ -1,52 +1,35 @@
-name: Add GitHub Release Tag
+name: Release
 
 on:
   push:
-    branches:
-      - main # 根据实际分支名修改（如 master）
-    paths:
-      - '**' # 监控所有文件变更（可根据需要调整）
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 要生成 Release 的 tag（如 v1.1.0），用于补发历史版本
+        required: true
 
 permissions:
   contents: write
 
 jobs:
   release:
-    # if: github.repository == '@huberyyang/todo-scripts'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 获取完整 Git 历史记录
+          fetch-depth: 0
 
-      - name: Extract version from commit message
-        id: extract-version
-        run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          if [[ $COMMIT_MSG =~ [cC]hore:\ release\ (v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            VERSION=${BASH_REMATCH[1]}
-            echo "Detected version: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "No release version detected in commit message."
-            exit 0  # 非发版提交，跳过后续步骤
-          fi
+      - uses: pnpm/action-setup@v4
 
-      - name: Create Git tag
-        if: steps.extract-version.outputs.version != ''
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git tag -a ${{ steps.extract-version.outputs.version }} -m "Release ${{ steps.extract-version.outputs.version }}"
-          git push origin ${{ steps.extract-version.outputs.version }}
-
-      - name: Create GitHub Release
-        if: steps.extract-version.outputs.version != ''
-        uses: softprops/action-gh-release@v2
+      - uses: actions/setup-node@v4
         with:
-          tag_name: ${{ steps.extract-version.outputs.version }}
-          name: ${{ steps.extract-version.outputs.version }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+          node-version: 20
+          cache: pnpm
+
+      - name: Generate changelog and GitHub Release
+        run: pnpm dlx changelogithub --to ${{ github.event.inputs.tag || github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
