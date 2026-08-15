@@ -233,7 +233,8 @@ describe('hasDependency', () => {
   })
 
   it('写进了 package.json 但 node_modules 下不存在时应该返回 false', () => {
-    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).endsWith('node_modules/husky'))
+    // resolve() 在 windows 上返回反斜杠路径，用 posix 化后的字符串比较，两个平台都能命中
+    vi.spyOn(fs, 'existsSync').mockImplementation(p => !String(p).replaceAll('\\', '/').endsWith('node_modules/husky'))
     vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ devDependencies: { husky: '^9.0.0' } }))
     expect(hasDependency('husky')).toBe(false)
   })

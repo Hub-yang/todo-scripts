@@ -5,7 +5,7 @@ import { writeFile as w } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import yoctoSpinner from 'yocto-spinner'
-import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT } from '@/constants'
+import { CONFIG_COMMITLINT, CONFIG_COMMITLINT_CZGIT, CONFIG_LINT_STAGED } from '@/constants'
 import { execCommand, getPackageJSON, hasDependency, isTsProject, printWarn, writePackageJSON } from '@/utils'
 import { createPackageManager } from '@/utils/package-manager'
 
@@ -19,6 +19,8 @@ export interface SetupPlan {
   packages: string[]
   /** 要生成的 commitlint 配置文件 */
   configFile: { name: string, content: string }
+  /** 要生成的 lint-staged 配置文件 */
+  lintStagedConfigFile: { name: string, content: string }
   /** 要写入的 husky 钩子 */
   hooks: HookFile[]
 }
@@ -44,6 +46,8 @@ export function planSetup(
       name: env.isTsProject ? 'commitlint.config.ts' : 'commitlint.config.js',
       content: useCZGit ? CONFIG_COMMITLINT_CZGIT : CONFIG_COMMITLINT,
     },
+    // 固定用 .mjs：天然 ESM，不受目标项目 package.json 的 type 字段影响
+    lintStagedConfigFile: { name: 'lint-staged.config.mjs', content: CONFIG_LINT_STAGED },
     hooks: [
       // 钩子是 shell 脚本，写进去的是命令字符串而不是去执行它，所以用 formatExec
       { path: '.husky/pre-commit', content: env.pm.formatExec('lint-staged') },
@@ -60,10 +64,6 @@ export function patchPackageJSON(pkg: PackageJsonLike, options: ArgvOptions): Pa
   const patched: PackageJsonLike = {
     ...pkg,
     scripts,
-    // 命令末尾不加 `.`：加了会让 eslint 对整个仓库而非暂存文件跑，
-    // 拖慢提交且可能被无关文件的历史问题卡住。
-    // 用户已经配过 lint-staged 就不动它，那是用户自己的规则
-    'lint-staged': pkg['lint-staged'] ?? { '*': 'eslint --fix' },
   }
 
   if (options.czgit) {
@@ -138,6 +138,21 @@ export async function init(options: ArgvOptions) {
     spinner.success('commitlint config succeed!')
   }
 
+  // create lint-staged config file
+  spinner.start('lint-staged config running...')
+  const { name: lintStagedName, content: lintStagedContent } = plan.lintStagedConfigFile
+  let lintStagedFilePresent = existsSync(resolve(cwd, lintStagedName))
+  // 已有独立配置文件，或者 package.json 里还留着旧形态的内联字段：都视为用户已有配置，不覆盖
+  if (lintStagedFilePresent || getPackageJSON()['lint-staged']) {
+    spinner.stop()
+    printWarn(`lint-staged config already exists, skipped.`)
+  }
+  else {
+    await w(lintStagedName, lintStagedContent)
+    lintStagedFilePresent = true
+    spinner.success('lint-staged config succeed!')
+  }
+
   // config husky
   spinner.start('husky config running...')
   const existingHooks = snapshotExistingHooks(cwd, plan.hooks)
@@ -153,6 +168,8 @@ export async function init(options: ArgvOptions) {
 
   // write in package.json
   spinner.start('package.json writing...')
+  // husky init 可能刚往 package.json 写过 scripts.prepare，这里必须重新读取，
+  // 不能复用上面 lint-staged 检查时的快照，否则会把 husky 的写入覆盖掉
   await writePackageJSON(patchPackageJSON(getPackageJSON(), options))
   spinner.success('package.json writing succeed!')
 
@@ -161,7 +178,10 @@ export async function init(options: ArgvOptions) {
     spinner.start('lint running')
     // 直接执行项目本地的 eslint，不再往用户 package.json 里塞临时脚本；
     // 格式化失败不影响初始化结果，配置文件此时已经写好了
-    await pm.exec(`eslint package.json ${name} --fix`, { allowFailure: true })
+    const lintTargets = ['package.json', name]
+    if (lintStagedFilePresent)
+      lintTargets.push(lintStagedName)
+    await pm.exec(`eslint ${lintTargets.join(' ')} --fix`, { allowFailure: true })
     spinner.success('lint down!')
   }
 }

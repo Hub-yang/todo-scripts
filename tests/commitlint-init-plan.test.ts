@@ -53,14 +53,28 @@ describe('planSetup', () => {
       { path: '.husky/commit-msg', content: 'pnpm exec commitlint --edit "$1"' },
     ])
   })
+
+  it('lint-staged 配置文件固定生成 lint-staged.config.mjs，不区分 ts/js 项目', () => {
+    expect(planSetup({}, { isTsProject: true, pm }).lintStagedConfigFile.name).toBe('lint-staged.config.mjs')
+    expect(planSetup({}, { isTsProject: false, pm }).lintStagedConfigFile.name).toBe('lint-staged.config.mjs')
+  })
+
+  it('lint-staged 配置文件内容应该等价于默认规则', () => {
+    const { content } = planSetup({}, { isTsProject: true, pm }).lintStagedConfigFile
+    expect(content).toContain('export default')
+    expect(content).toContain('eslint --fix')
+  })
 })
 
 describe('patchPackageJSON', () => {
-  it('应该写入 commitlint 脚本和 lint-staged 配置', () => {
+  it('应该写入 commitlint 脚本', () => {
     const result = patchPackageJSON({ name: 'demo' }, {})
     expect(result.scripts!.commitlint).toBe('commitlint --edit')
-    // 不能带 `.`，否则 lint-staged 会对整个仓库跑 eslint
-    expect(result['lint-staged']).toEqual({ '*': 'eslint --fix' })
+  })
+
+  it('lint-staged 配置已经改用独立文件，不应该再往 package.json 里注入默认值', () => {
+    const result = patchPackageJSON({ name: 'demo' }, {})
+    expect(result['lint-staged']).toBeUndefined()
   })
 
   it('用户已有的 lint-staged 配置不应该被覆盖', () => {

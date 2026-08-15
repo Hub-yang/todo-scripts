@@ -48,6 +48,11 @@ vi.mock('yocto-spinner', () => ({
 
 const { init } = await import('@/scripts/commitlint-init')
 
+// resolve() 在 windows 上返回反斜杠路径，断言前统一转成 posix 风格，两个平台都能命中
+function toPosix(p: unknown): string {
+  return String(p).replaceAll('\\', '/')
+}
+
 describe('commitlint-init init()', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -115,18 +120,39 @@ describe('commitlint-init init()', () => {
     vi.mocked(existsSync).mockImplementation(p => String(p).includes('.husky'))
     vi.mocked(readFileSync).mockReturnValue('# 用户自己手写的钩子')
     await init({})
-    expect(writeFile).toHaveBeenCalledWith(expect.stringContaining('.husky/pre-commit'), '# 用户自己手写的钩子')
-    expect(writeFile).toHaveBeenCalledWith(expect.stringContaining('.husky/commit-msg'), '# 用户自己手写的钩子')
+    expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/\.husky[\\/]pre-commit$/), '# 用户自己手写的钩子')
+    expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/\.husky[\\/]commit-msg$/), '# 用户自己手写的钩子')
     // 不能写成我们自己的钩子内容
-    expect(writeFile).not.toHaveBeenCalledWith(expect.stringContaining('.husky/pre-commit'), expect.stringContaining('lint-staged'))
+    expect(writeFile).not.toHaveBeenCalledWith(expect.stringMatching(/\.husky[\\/]pre-commit$/), expect.stringContaining('lint-staged'))
     expect(printWarnMock).toHaveBeenCalledWith(expect.stringContaining('.husky/pre-commit'))
     expect(printWarnMock).toHaveBeenCalledWith(expect.stringContaining('.husky/commit-msg'))
   })
 
+  it('lint-staged 配置文件不存在时应该写入 lint-staged.config.mjs', async () => {
+    await init({})
+    expect(writeFile).toHaveBeenCalledWith('lint-staged.config.mjs', expect.stringContaining('eslint --fix'))
+  })
+
+  it('lint-staged.config.mjs 已存在时应该跳过写入并给出警告', async () => {
+    vi.mocked(existsSync).mockImplementation(p => String(p).includes('lint-staged.config.mjs'))
+    await init({})
+    expect(writeFile).not.toHaveBeenCalledWith('lint-staged.config.mjs', expect.anything())
+    expect(printWarnMock).toHaveBeenCalledWith(expect.stringContaining('lint-staged'))
+  })
+
+  it('package.json 已有内联 lint-staged 字段时应该跳过写入并给出警告，且不清理该字段', async () => {
+    pkgState = { 'name': 'demo', 'lint-staged': { '*.ts': 'my-own-linter' } }
+    await init({})
+    expect(writeFile).not.toHaveBeenCalledWith('lint-staged.config.mjs', expect.anything())
+    expect(printWarnMock).toHaveBeenCalledWith(expect.stringContaining('lint-staged'))
+    const written = writePackageJSONMock.mock.calls[0][0]
+    expect(written['lint-staged']).toEqual({ '*.ts': 'my-own-linter' })
+  })
+
   it('husky hooks 不存在时应该写入 pre-commit 和 commit-msg', async () => {
     await init({})
-    expect(writeFile).toHaveBeenCalledWith(expect.stringContaining('.husky/pre-commit'), expect.stringContaining('lint-staged'))
-    expect(writeFile).toHaveBeenCalledWith(expect.stringContaining('.husky/commit-msg'), expect.stringContaining('commitlint'))
+    expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/\.husky[\\/]pre-commit$/), expect.stringContaining('lint-staged'))
+    expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/\.husky[\\/]commit-msg$/), expect.stringContaining('commitlint'))
   })
 
   it('husky init 自己创建的 pre-commit 不应该挡住我们的钩子', async () => {
@@ -137,25 +163,24 @@ describe('commitlint-init init()', () => {
       if (command === 'husky init')
         huskyInitialized = true
     })
-    vi.mocked(existsSync).mockImplementation(p => huskyInitialized && String(p).includes('.husky/pre-commit'))
+    vi.mocked(existsSync).mockImplementation(p => huskyInitialized && toPosix(p).includes('.husky/pre-commit'))
 
     await init({})
 
     expect(huskyInitialized).toBe(true)
     expect(writeFile).toHaveBeenCalledWith(
-      expect.stringContaining('.husky/pre-commit'),
+      expect.stringMatching(/\.husky[\\/]pre-commit$/),
       expect.stringContaining('lint-staged'),
     )
     // 这个钩子本来就不属于用户，不该冒出「已存在」的提示
     expect(printWarnMock).not.toHaveBeenCalledWith(expect.stringContaining('.husky/pre-commit'))
   })
 
-  it('应该在 package.json 中写入 commitlint 脚本和 lint-staged 配置', async () => {
+  it('应该在 package.json 中写入 commitlint 脚本', async () => {
     await init({})
     expect(writePackageJSONMock).toHaveBeenCalled()
     const written = writePackageJSONMock.mock.calls[0][0]
     expect(written.scripts!.commitlint).toBe('commitlint --edit')
-    expect(written['lint-staged']).toEqual({ '*': 'eslint --fix' })
   })
 
   it('--czgit 时应该写入 commitizen 配置和 cz 脚本', async () => {
@@ -181,9 +206,30 @@ describe('commitlint-init init()', () => {
     hasDependencyMock.mockImplementation(pkg => pkg === 'eslint')
     await init({})
     expect(pmExecMock).toHaveBeenCalledWith(
+      'eslint package.json commitlint.config.ts lint-staged.config.mjs --fix',
+      { allowFailure: true },
+    )
+  })
+
+  it('package.json 已有内联 lint-staged 字段时，eslint --fix 不应该引用未生成的配置文件', async () => {
+    pkgState = { 'name': 'demo', 'lint-staged': { '*.ts': 'my-own-linter' } }
+    hasDependencyMock.mockImplementation(pkg => pkg === 'eslint')
+    await init({})
+    expect(pmExecMock).toHaveBeenCalledWith(
       'eslint package.json commitlint.config.ts --fix',
       { allowFailure: true },
     )
+  })
+
+  it('husky init 写入的 scripts.prepare 不应该被后续 package.json 写入覆盖掉', async () => {
+    // 模拟真实 husky init 的副作用：无条件往 package.json 写 scripts.prepare
+    pmExecMock.mockImplementation(async (command: string) => {
+      if (command === 'husky init')
+        pkgState = { ...pkgState, scripts: { ...pkgState.scripts, prepare: 'husky' } }
+    })
+    await init({})
+    const written = writePackageJSONMock.mock.calls[0][0]
+    expect(written.scripts!.prepare).toBe('husky')
   })
 
   it('不应该再往 package.json 里写临时的 fix 脚本', async () => {
