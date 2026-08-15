@@ -67,3 +67,28 @@ describe('config_COMMITLINT_CZGIT', () => {
     expect(CONFIG_COMMITLINT_CZGIT).toContain('修复缺陷 | A bug fix')
   })
 })
+
+describe('cONFIG_COMMITLINT 与 CONFIG_COMMITLINT_CZGIT 的 type-enum 应该一致', () => {
+  function extractTypes(config: string): string[] {
+    const match = config.match(/'type-enum': \[2, 'always', \[([\s\S]*?)\]\]/)
+    const body = match?.[1] ?? ''
+    return [...body.matchAll(/'([a-z]+)'/g)].map(m => m[1]).sort()
+  }
+
+  it('两份配置的 type-enum 类型集合应该完全相同', () => {
+    expect(extractTypes(CONFIG_COMMITLINT)).toEqual(extractTypes(CONFIG_COMMITLINT_CZGIT))
+  })
+
+  it('不应该包含非标准的 merge/update 类型', () => {
+    expect(CONFIG_COMMITLINT).not.toContain(`'merge'`)
+    expect(CONFIG_COMMITLINT).not.toContain(`'update'`)
+  })
+})
+
+describe('cONFIG_COMMITLINT_CZGIT 的 issuePrefixes', () => {
+  it('默认值应该是中性的 GitHub 风格，不再硬编码 Gitee', () => {
+    expect(CONFIG_COMMITLINT_CZGIT).not.toContain('link:')
+    expect(CONFIG_COMMITLINT_CZGIT).not.toContain('closed:')
+    expect(CONFIG_COMMITLINT_CZGIT).toContain(`{ value: 'closes'`)
+  })
+})

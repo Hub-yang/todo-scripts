@@ -1,21 +1,29 @@
+/** 两份 commitlint 配置模板共用的标准 Conventional Commits 类型列表 */
+const COMMIT_TYPES = [
+  'feat',
+  'fix',
+  'docs',
+  'style',
+  'refactor',
+  'perf',
+  'test',
+  'build',
+  'ci',
+  'revert',
+  'chore',
+]
+
+/** 渲染成 type-enum 规则里的数组项文本，两份配置模板共用同一份类型列表 */
+function renderTypeEnum(): string {
+  return COMMIT_TYPES.map(type => `      '${type}',`).join('\n')
+}
+
 export const CONFIG_COMMITLINT
   = `export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [2, 'always', [
-      'build',
-      'ci',
-      'docs',
-      'feat',
-      'merge',
-      'fix',
-      'perf',
-      'refactor',
-      'style',
-      'test',
-      'revert',
-      'update',
-      'chore',
+${renderTypeEnum()}
     ]],
   },
 }`
@@ -26,17 +34,7 @@ export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [2, 'always', [
-      'feat',
-      'fix',
-      'docs',
-      'style',
-      'refactor',
-      'perf',
-      'test',
-      'build',
-      'ci',
-      'revert',
-      'chore',
+${renderTypeEnum()}
     ]],
   },
   prompt: {
@@ -84,9 +82,8 @@ export default {
     breaklineChar: '|',
     skipQuestions: [],
     issuePrefixes: [
-      // 如果使用 gitee 作为开发管理
-      { value: 'link', name: 'link:     链接 ISSUES 进行中' },
-      { value: 'closed', name: 'closed:   标记 ISSUES 已完成' },
+      // 默认使用 GitHub 风格；如果使用 Gitee 作为开发管理，可自行替换为 link/closed 前缀
+      { value: 'closes', name: 'closes:   关闭/解决一个 issue' },
     ],
     customIssuePrefixAlign: 'top',
     emptyIssuePrefixAlias: 'skip',
