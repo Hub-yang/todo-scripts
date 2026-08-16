@@ -12,6 +12,7 @@ import {
   isTsProject,
   printErr,
   printWarn,
+  resolveBannerMode,
   ScriptError,
   writePackageJSON,
 } from '@/utils'
@@ -198,6 +199,36 @@ describe('printErr', () => {
     expect(output).toContain('test error')
     expect(output).toContain('ERROR')
     spy.mockRestore()
+  })
+})
+
+// ========================================
+// resolveBannerMode - 头部横幅按终端能力选择渲染模式
+// ========================================
+describe('resolveBannerMode', () => {
+  it('终端够宽且支持颜色时应该返回 gradient', () => {
+    expect(resolveBannerMode(120, true)).toBe('gradient')
+  })
+
+  it('终端宽度不足以放下大字时应该返回 plain', () => {
+    expect(resolveBannerMode(40, true)).toBe('plain')
+  })
+
+  it('终端不支持颜色时应该返回 plain（即便宽度足够）', () => {
+    expect(resolveBannerMode(120, false)).toBe('plain')
+  })
+
+  it('宽度刚好等于阈值时应该返回 gradient', () => {
+    expect(resolveBannerMode(90, true)).toBe('gradient')
+  })
+
+  it('宽度比阈值少 1 列时应该返回 plain', () => {
+    expect(resolveBannerMode(89, true)).toBe('plain')
+  })
+
+  it('非 TTY 场景下 columns 为 0 时应该返回 plain', () => {
+    // banner() 在 process.stdout.columns 为 undefined 时会传 0 进来
+    expect(resolveBannerMode(0, true)).toBe('plain')
   })
 })
 

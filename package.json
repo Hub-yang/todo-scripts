@@ -55,6 +55,8 @@
     "bumpp": "^11.0.1",
     "eslint": "^10.2.0",
     "execa": "^9.6.1",
+    "figlet": "^1.11.4",
+    "gradient-string": "^3.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "mri": "^1.2.0",

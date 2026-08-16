@@ -5,6 +5,9 @@ import path, { resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { execaCommand } from 'execa'
+import figlet from 'figlet'
+import bannerFont from 'figlet/importable-fonts/ANSI Shadow.js'
+import gradient from 'gradient-string'
 import colors from 'picocolors'
 import terminalLink from 'terminal-link'
 import { parse as parseYaml } from 'yaml'
@@ -29,7 +32,15 @@ export interface PackageJsonLike {
   [key: string]: any
 }
 
-const { bold, italic, blue, dim, bgYellow, bgRed } = colors
+const { bold, dim, bgYellow, bgRed, isColorSupported } = colors
+
+const BRAND_NAME = 'TODO-SCRIPT'
+const BANNER_FONT_NAME = 'todo-script-banner'
+/** figlet 'ANSI Shadow' 字体渲染 "TODO-SCRIPT" 的实测宽度是 85 列，留出安全边距 */
+const BANNER_MIN_WIDTH = 90
+const BANNER_GRADIENT_COLORS = ['#00c6ff', '#a34dff']
+
+let isBannerFontRegistered = false
 
 /**
  * 脚本执行过程中的预期内失败
@@ -64,52 +75,57 @@ export function printErr(msg: string) {
 }
 
 /**
+ * 根据终端宽度与渲染能力，决定 banner 用渐变大字还是纯文本
+ *
+ * 纯函数，不碰 process.stdout，方便单测覆盖判定逻辑
+ * @param {number} columns - 终端可用列宽
+ * @param {boolean} canRenderGradient - 是否可以渲染渐变（真终端 TTY 且支持颜色）
+ * @returns {'gradient' | 'plain'} - 渲染模式
+ */
+export function resolveBannerMode(columns: number, canRenderGradient: boolean): 'gradient' | 'plain' {
+  if (!canRenderGradient)
+    return 'plain'
+  if (columns < BANNER_MIN_WIDTH)
+    return 'plain'
+  return 'gradient'
+}
+
+/**
  * print banner
+ *
+ * 只有真终端（TTY）+ 支持颜色 + 宽度足够时才渲染渐变大字：
+ * picocolors 在 win32 上不看 TTY 直接判定支持颜色，
+ * 所以这里显式带上 isTTY，不能只靠 columns 是否为 0 去间接判断
  */
 export function banner() {
-  let { version = '--', author = 'HuberyYang', name = DEFAULT_PKG_NAME, homepage = REPO_URL } = getPkgInfo()
-  const l_version = version.length
-  const l_author = author.length
-  const l_name = name.length
-  name = bold(italic(name))
-  version = blue(`version ${version}`)
-  author = blue(`author ${author}`)
-  homepage = dim(`(${homepage})`)
+  const { version = '--', author = 'HuberyYang' } = getPkgInfo()
+  const canRenderGradient = isColorSupported && Boolean(process.stdout.isTTY)
+  const mode = resolveBannerMode(process.stdout.columns ?? 0, canRenderGradient)
 
-  const link_version = terminalLink(version, `https://www.npmjs.com/package/${DEFAULT_PKG_NAME}`)
-  const link_name = terminalLink(name, REPO_URL)
-  const link_author = terminalLink(author, REPO_URL)
-  const isSupportLink = terminalLink.isSupported
-
-  const l_init = 36
-  const lineBase = '='.repeat(l_init)
-  const lineOne = `⦚${' '.repeat(l_init - 2 - l_name)}${isSupportLink ? link_name : name}⦚`
-  const lineTwo = `⦚${' '.repeat(l_init - 2)}⦚`
-  const lineThree = `⦚${' '.repeat(l_init - 2 - l_version - 'version'.length - 1)}${isSupportLink ? link_version : version}⦚`
-  const lineFour = `⦚${' '.repeat(l_init - 2 - l_author - 'author'.length - 1)}${isSupportLink ? link_author : author}⦚`
-
-  let banner
-  if (isSupportLink) {
-    banner
-      = `${lineBase}
-${lineOne}
-${lineTwo}
-${lineThree}
-${lineFour}
-${lineBase}\n`
+  console.log('')
+  if (mode === 'gradient') {
+    if (!isBannerFontRegistered) {
+      figlet.parseFont(BANNER_FONT_NAME, bannerFont)
+      isBannerFontRegistered = true
+    }
+    const wordmark = figlet.textSync(BRAND_NAME, { font: BANNER_FONT_NAME })
+    console.log(gradient(BANNER_GRADIENT_COLORS).multiline(wordmark))
   }
   else {
-    banner
-      = `\n${lineBase}
-${lineOne}
-${lineTwo}
-${lineThree}
-${lineFour}
-${lineBase}
-${homepage}\n`
+    console.log(bold(BRAND_NAME))
   }
 
-  console.log(banner)
+  const isSupportLink = terminalLink.isSupported
+  let versionText = dim(`v${version}`)
+  const authorLabel = `${author}`
+  const authorText = isSupportLink ? terminalLink(dim(authorLabel), REPO_URL) : dim(authorLabel)
+  if (isSupportLink)
+    versionText = terminalLink(versionText, `https://www.npmjs.com/package/${DEFAULT_PKG_NAME}`)
+
+  console.log(`${versionText} ${dim('-')} ${authorText}`)
+  if (!isSupportLink)
+    console.log(dim(`(${REPO_URL})`))
+  console.log('')
 }
 
 /**
